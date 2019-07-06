@@ -1,0 +1,75 @@
+/* main.css */
+
+.main {
+  background-image: url('../img/machine_33.png');
+  background-position: center;
+  background-size: auto;
+  background-repeat: no-repeat;
+  background-origin: padding-box;
+  background-clip: border-box;
+  background-attachment: fixed;
+  background-color: transparent;
+}
+
+.eighty-tall {
+  height: 600px
+}
+
+.orbit-right-image {
+  height: 600px
+}
+
+.min-height-300 {
+  min-height:21em
+}
+
+.logo {
+	width: 250px;
+  -webkit-filter: drop-shadow( 0 0 .3px rgba(180, 180, 180, 1));
+  filter: drop-shadow( 0 0 .3px rgba(180, 180, 180, 1));
+}
+
+.top-grey, .middle-yellow, .bottom-grey {
+  text-shadow: 1px 1px 1px #888;
+}
+
+
+.top-bar, .menu {
+  background: rgba(255,255,255,1)!important
+}
+
+.title-bar-title {
+  color: rgba(0,0,0,.5)
+}
+
+/* map css */
+.map {
+  position: relative;
+  border: 1px solid black;
+  border-radius: 4px;
+  height: 600px;
+  width: 100%;
+}
+
+.map-title {
+	text-shadow: 2px 2px 3px #888;
+}
+
+.map-select {
+	margin-top: -1.25em; 
+	text-shadow: 1px 1px 1px #888;	
+}
+
+/* Demo Styles */
+
+.demo-toggle-title {
+  margin-top: 0.5rem;
+}
+
+.top-bar {
+  width: 100%;
+}
+
+.menu .active {
+  font-weight: bold;
+}

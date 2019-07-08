@@ -445,7 +445,7 @@ $(document).foundation();
 
     function showPanel(Lmap, marker) {
         CN(arguments)
-        var saddr = 'My%20Location'
+        var saddr = ''
         if (Panels[Lmap.options.type]) {
             Panels[Lmap.options.type].remove()
         }

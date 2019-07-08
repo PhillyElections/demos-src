@@ -475,6 +475,7 @@ $(document).foundation();
                     dates += getFormattedDate(start, end).replace(' ', '&nbsp;')
                 }
                 daddr = (marker.options.attributes[0].address_street + ' Philadelphia PA ' + marker.options.attributes[0].zip).replace(" ", "+")
+                saddr = saddr ? saddr : 'My%20Location'
                 url += saddr + '&daddr=' + daddr
                 if (marker.options.attributes[0].display_title) {
                     title = '<tr><td>Event:</td><td>' + marker.options.attributes[0].display_title + '</td></tr>'

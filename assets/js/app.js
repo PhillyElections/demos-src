@@ -371,9 +371,11 @@ $(document).foundation();
             Panels[Lmap.options.type].onAdd = function(Lmap) {
                 var div = L.DomUtil.create('div', 'event-panel ' + Lmap.options.type),
                     dates = '',
+                    dates_array = [],
                     daddr = marker.options.attributes[0].street_name,
                     title = '',
-                    url ='https://maps.google.com?saddr='
+                    url ='https://maps.google.com?saddr=',
+                    csv_obj = ''
                 for (var i=0;i<marker.options.attributes.length;i++) {
                     var start = new Date(marker.options.attributes[i].start),
                         end = new Date(marker.options.attributes[i].end)
@@ -386,6 +388,7 @@ $(document).foundation();
                 url += saddr + '&daddr=' + daddr
                 if (marker.options.attributes[0].display_title) {
                     title = '<tr><td>Event:</td><td>' + marker.options.attributes[0].display_title + '</td></tr>'
+
                 } else {
                     title = (marker.options.attributes[0].event_name ? '<tr><td>Event:</td><td>' + marker.options.attributes[0].event_name + '</td></tr>' : '' ) +
                             (marker.options.attributes[0].organization_name ? '<tr><td>Organization:</td><td>' + marker.options.attributes[0].organization_name + '</td></tr>' : '' ) +

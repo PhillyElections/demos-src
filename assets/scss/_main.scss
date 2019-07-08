@@ -20,8 +20,12 @@
   height: 600px
 }
 
+option.option-text, select.option-text {
+/*  font-size: .8em!important*/
+}
+
 .min-height-300 {
-  min-height:40vh
+  min-height:22em
 }
 
 .logo {

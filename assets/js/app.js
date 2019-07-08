@@ -130,27 +130,55 @@ $(document).foundation();
         });
     };
 
-    function getFormattedDate(start,end) {
-        return 'M d, Y sT - eT'
-                .replace('M', months[start.getMonth()])
-                .replace('d', start.getDate())
-                .replace('Y', start.getFullYear())
-                .replace('sT', (start.getHours() == 0 ? "TBA" : 
-                                    (start.getHours() > 12 ? (start.getHours() % 12 ) : start.getHours() + 
-                                        (start.getMinutes() > 0 ? ':' + ('000'+start.getMinutes()).slice(-2) : '')
-                                        ) + 
-                                    (start.getHours() >= 12 ? 'pm' : 'am')
-                                    
-                                )
-                        )
-                .replace('eT', (end.getHours() == 0 ? "TBA" : 
-                                    (end.getHours() > 12 ? (end.getHours() % 12 ) : end.getHours() + 
-                                        (end.getMinutes() > 0 ? ':' + ('000'+end.getMinutes()).slice(-2) : '')
-                                        ) + 
-                                    (end.getHours() >= 12 ? 'pm' : 'am')
-                                )
-                        )
-                .replace(' ', '&nbsp;')
+    function getFormattedDate(start, end) {
+        if (start && end) {
+            return 'M d, Y sT - eT'
+                    .replace('M', months[start.getMonth()])
+                    .replace('d', start.getDate())
+                    .replace('Y', start.getFullYear())
+                    .replace('sT', (start.getHours() == 0 ? "TBA" : 
+                                        (start.getHours() > 12 ? (start.getHours() % 12 ) : start.getHours() + 
+                                            (start.getMinutes() > 0 ? ':' + ('000'+start.getMinutes()).slice(-2) : '')
+                                            ) + 
+                                        (start.getHours() >= 12 ? 'pm' : 'am')
+                                        
+                                    )
+                            )
+                    .replace('eT', (end.getHours() == 0 ? "TBA" : 
+                                        (end.getHours() > 12 ? (end.getHours() % 12 ) : end.getHours() + 
+                                            (end.getMinutes() > 0 ? ':' + ('000'+end.getMinutes()).slice(-2) : '')
+                                            ) + 
+                                        (end.getHours() >= 12 ? 'pm' : 'am')
+                                    )
+                            )
+        }
+        if (start) {
+            return 'M d Y sT'
+                    .replace('M', months[start.getMonth()])
+                    .replace('d', start.getDate())
+                    .replace('Y', start.getFullYear())
+                    .replace('sT', (start.getHours() == 0 ? "TBA" : 
+                                        (start.getHours() > 12 ? (start.getHours() % 12 ) : start.getHours() + 
+                                            (start.getMinutes() > 0 ? ':' + ('000'+start.getMinutes()).slice(-2) : '')
+                                            ) + 
+                                        (start.getHours() >= 12 ? 'pm' : 'am')
+                                        
+                                    )
+                            )
+        }
+        if (end) {
+            return 'M d Y eT'
+                    .replace('M', months[start.getMonth()])
+                    .replace('d', start.getDate())
+                    .replace('Y', start.getFullYear())
+                    .replace('eT', (end.getHours() == 0 ? "TBA" : 
+                                        (end.getHours() > 12 ? (end.getHours() % 12 ) : end.getHours() + 
+                                            (end.getMinutes() > 0 ? ':' + ('000'+end.getMinutes()).slice(-2) : '')
+                                            ) + 
+                                        (end.getHours() >= 12 ? 'pm' : 'am')
+                                    )
+                            )
+        }
     }
 
     function getWeekNumber(d) {
@@ -210,8 +238,8 @@ $(document).foundation();
     function setInitialMarkers(Lmap, jsn) {
         CN(arguments)
 
-        var addresses = [], ward, select, title, marker, wards = [],
-            options = ''
+        var addresses = [], ward, link, select, title, marker, row_obj, wards = [],
+            options = '', start, end
 
         // setup our 'global' arrays
         // active 
@@ -224,6 +252,8 @@ $(document).foundation();
         Wards[Lmap.options.type] = []
         // display panel(s)
         Panels[Lmap.options.type] = null
+        //
+        Lmap.options.csv_array = []
         for (var i = 0; i < jsn.features.length; i++) {
             ward = pad(jsn.features[i].attributes.precinct, 4).substr(0, 2)
             // instantiate array segment if needed
@@ -234,6 +264,29 @@ $(document).foundation();
                 wards[Number(ward)] = ward
             }
             addresses[ward+'|'+jsn.features[i].attributes.address_street].push(jsn.features[i])
+
+            // refresh array
+            row_obj = []
+
+            start = new Date(jsn.features[i].attributes.start)
+            end = new Date(jsn.features[i].attributes.end)
+            row_obj.start = getFormattedDate(start)
+            row_obj.end = getFormattedDate(end)
+            row_obj.address = jsn.features[i].attributes.address_street
+            row_obj.zip = jsn.features[i].attributes.zip
+
+            // let's built and push out CSV export rows
+            if (jsn.features[i].attributes.display_title) {
+                row_obj.event = jsn.features[i].attributes.display_title
+            } else if (jsn.features[i].attributes.event_name) {
+                row_obj.event = jsn.features[i].attributes.event_name
+            } else if (jsn.features[i].attributes.location_name) {
+                row_obj.event = jsn.features[i].attributes.location_name
+            } else {
+                row_obj.event = jsn.features[i].attributes.organization_name
+            }
+            Lmap.options.csv_array.push(row_obj)
+
         }
         Object.keys(addresses).forEach(function (idx) {
             var attributes = [], coordinates
@@ -254,6 +307,7 @@ $(document).foundation();
             if ('undefined' == typeof Addresses[Lmap.options.type][idx] ) {
                 Addresses[Lmap.options.type][idx] = []
             }
+
             Addresses[Lmap.options.type][idx].push(marker)
         })
         for (var i = 0; i < jsn.features.length; i++) {
@@ -277,10 +331,18 @@ $(document).foundation();
 
         // let's add markers with a uniform method
         addToMap(Lmap,Addresses[Lmap.options.type])
-        options += "<option>-all-</option>"
+        options += '<option class="option-text">-all-</option>'
         wards.forEach(function(idx, element) {
-            options += "<option>" + idx + "</option>"
+            options += '<option class="option-text">' + idx + '</option>'
         })
+
+        link = L.control({ position: 'bottomleft' });
+        link.onAdd = function (Lmap) {
+            var div = L.DomUtil.create('div', 'leaflet-control-attribution'); // create a div with a class "info"
+            div.innerHTML = '<a id="'+Lmap.options.type+'_download">Download CSV</a>';
+            return div;
+        };
+        link.addTo(Lmap);
 
         // set title for this map
         title = L.control({ position: 'topleft' });
@@ -295,7 +357,7 @@ $(document).foundation();
         select = L.control({ position: 'topleft' })
         select.onAdd = function(Lmap) {
             var div = L.DomUtil.create('div', 'info legend');
-            div.innerHTML = '<div class="map-select">Filter by ward:</div><select id="' + Lmap.options.selectId + '">' + options + '</select>'
+            div.innerHTML = '<div class="map-select">Filter by ward:</div><select class="option-text" id="' + Lmap.options.selectId + '">' + options + '</select>'
             div.firstChild.onmousedown = div.firstChild.ondblclick = L.DomEvent.stopPropagation
             return div
         }
@@ -351,9 +413,39 @@ $(document).foundation();
         }
     }
 
+    function writeCSVLink(Lmap) {
+        CN(arguments)
+        var csv_array = Lmap.options.csv_array,
+            content = "data:text/csv;charset=utf-8,"
+
+        function obj2CSVRow(dataObject) {
+            var dataArray = new Array;
+            for (var o in dataObject) {
+                var innerValue = dataObject[o]===null?'':dataObject[o].toString();
+                var result = innerValue.replace(/"/g, '""');
+                result = '"' + result + '"';
+                dataArray.push(result);
+            }
+            return dataArray.join(',') + '\r\n';
+        }
+
+        // column headers
+        content += obj2CSVRow(Object.keys(csv_array[0]));
+
+        //rows
+        Object.keys(csv_array).forEach(function(item){
+            content += obj2CSVRow(csv_array[item]);
+        }); 
+
+        var encodedUri = encodeURI(content);
+        var link = D.getElementById(Lmap.options.type+'_download')
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", Lmap.options.type+"_events.csv");
+    }
+
     function showPanel(Lmap, marker) {
         CN(arguments)
-        var saddr = ''
+        var saddr = 'My%20Location'
         if (Panels[Lmap.options.type]) {
             Panels[Lmap.options.type].remove()
         }
@@ -361,7 +453,7 @@ $(document).foundation();
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function (a) {
                 saddr=a.coords['latitude']+","+a.coords['longitude']
-                writePanel()
+
             }, writePanel, {timeout: 500})
         }
 
@@ -371,18 +463,16 @@ $(document).foundation();
             Panels[Lmap.options.type].onAdd = function(Lmap) {
                 var div = L.DomUtil.create('div', 'event-panel ' + Lmap.options.type),
                     dates = '',
-                    dates_array = [],
                     daddr = marker.options.attributes[0].street_name,
                     title = '',
-                    url ='https://maps.google.com?saddr=',
-                    csv_obj = ''
+                    url ='https://maps.google.com?saddr='
                 for (var i=0;i<marker.options.attributes.length;i++) {
                     var start = new Date(marker.options.attributes[i].start),
                         end = new Date(marker.options.attributes[i].end)
                     if (dates.length) {
                         dates += ', '
                     }
-                    dates += getFormattedDate(start, end)
+                    dates += getFormattedDate(start, end).replace(' ', '&nbsp;')
                 }
                 daddr = (marker.options.attributes[0].address_street + ' Philadelphia PA ' + marker.options.attributes[0].zip).replace(" ", "+")
                 url += saddr + '&daddr=' + daddr
@@ -472,6 +562,10 @@ $(document).foundation();
         getMarkersPromise(Services.demos_future).then(function(data) {
             var json = JSON.parse(data)
             setInitialMarkers(LmapFuture, json )
+        }).catch(function (error) {
+            console.log('error:', error)
+        }).finally(function () {
+            writeCSVLink(LmapFuture)
         })
 
         getMarkersPromise(Services.demos_past).then(function(data) {
@@ -480,22 +574,25 @@ $(document).foundation();
         }).catch(function (error) {
             console.log('error:', error)
         }).finally(function () {
+            writeCSVLink(LmapPast)
             $('#container-demos').hide()
             $('#menu-item-info').addClass('is-active')
+            if (navigator.geolocation) {
+                setTimeout( function() {
+                    navigator.geolocation.getCurrentPosition(function (a) {
+                        // success.  do nothing.
+                    }, function () {
+                        console.log("initial geolocation failed")
+                    }, {timeout: 500})                    
+                }, 1000)
+            }
         })
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function (a) {
-                // success.  do nothing.
-            }, function () {
-                console.log("initial geolocation failed")
-            }, {timeout: 500})
-        }
     })
     W.Lmap = []
     W.Lmap.getAll = function () {console.log('getAll',All)}
     W.Lmap.getActive = function () {console.log('getActive',Active)}
     W.Lmap.getAddresses = function () {console.log('getAddresses',Addresses)}
     W.Lmap.getWards = function () {console.log('getWards',Wards)}
-    W.Lmap.setDefaultBasemaps = setDefaultBasemaps
+
 }))

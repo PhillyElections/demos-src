@@ -34,21 +34,10 @@ $(document).foundation();
         baseUri = W.baseUri,
         Titles = {'past': 'Completed', 'future': 'Upcoming'},
         Active = [],
-        All = [],
-        GrouperContext = [],
-        LastAddressComplete = [],
-        AllIndexes = [],
-        FeatureGroup,
         LmapFuture,
         LmapPast,
-        endMarker,
         Panels = [],
-        Wards = [],
         Addresses = [],
-        wardDivision,
-        searchBox,
-        divisions,
-        wards,
         months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
         Icons = {
             p: L.spriteIcon('red'),
@@ -130,17 +119,21 @@ $(document).foundation();
         });
     };
 
-    function getFormattedDate(start, end) {
-        if (start && end) {
-            return 'M d, Y sT - eT'
+    function getFormattedDate(start) {
+        return 'M d, Y'
                     .replace('M', months[start.getMonth()])
                     .replace('d', start.getDate())
                     .replace('Y', start.getFullYear())
+    }
+
+    function getFormattedTime(start, end) {
+        if (start && end) {
+            return 'sT - eT'
                     .replace('sT', (start.getHours() == 0 ? "TBA" : 
                                         (start.getHours() > 12 ? (start.getHours() % 12 ) : start.getHours() + 
                                             (start.getMinutes() > 0 ? ':' + ('000'+start.getMinutes()).slice(-2) : '')
                                             ) + 
-                                        (start.getHours() >= 12 ? 'pm' : 'am')
+                                        (start.getHours() >= 12 ? ' pm' : ' am')
                                         
                                     )
                             )
@@ -148,34 +141,18 @@ $(document).foundation();
                                         (end.getHours() > 12 ? (end.getHours() % 12 ) : end.getHours() + 
                                             (end.getMinutes() > 0 ? ':' + ('000'+end.getMinutes()).slice(-2) : '')
                                             ) + 
-                                        (end.getHours() >= 12 ? 'pm' : 'am')
+                                        (end.getHours() >= 12 ? ' pm' : ' am')
                                     )
                             )
         }
         if (start) {
-            return 'M d Y sT'
-                    .replace('M', months[start.getMonth()])
-                    .replace('d', start.getDate())
-                    .replace('Y', start.getFullYear())
+            return 'sT'
                     .replace('sT', (start.getHours() == 0 ? "TBA" : 
                                         (start.getHours() > 12 ? (start.getHours() % 12 ) : start.getHours() + 
                                             (start.getMinutes() > 0 ? ':' + ('000'+start.getMinutes()).slice(-2) : '')
                                             ) + 
-                                        (start.getHours() >= 12 ? 'pm' : 'am')
+                                        (start.getHours() >= 12 ? ' pm' : ' am')
                                         
-                                    )
-                            )
-        }
-        if (end) {
-            return 'M d Y eT'
-                    .replace('M', months[start.getMonth()])
-                    .replace('d', start.getDate())
-                    .replace('Y', start.getFullYear())
-                    .replace('eT', (end.getHours() == 0 ? "TBA" : 
-                                        (end.getHours() > 12 ? (end.getHours() % 12 ) : end.getHours() + 
-                                            (end.getMinutes() > 0 ? ':' + ('000'+end.getMinutes()).slice(-2) : '')
-                                            ) + 
-                                        (end.getHours() >= 12 ? 'pm' : 'am')
                                     )
                             )
         }
@@ -244,16 +221,14 @@ $(document).foundation();
         // setup our 'global' arrays
         // active 
         Active[Lmap.options.type] = []
-        // all
-        All[Lmap.options.type] = []
         // by Address
         Addresses[Lmap.options.type] = []
-        // wards past/future (wards to be set)
-        Wards[Lmap.options.type] = []
         // display panel(s)
         Panels[Lmap.options.type] = null
         //
         Lmap.options.csv_array = []
+        Lmap.options.total = jsn.features.length
+
         for (var i = 0; i < jsn.features.length; i++) {
             ward = pad(jsn.features[i].attributes.precinct, 4).substr(0, 2)
             // instantiate array segment if needed
@@ -270,8 +245,9 @@ $(document).foundation();
 
             start = new Date(jsn.features[i].attributes.start)
             end = new Date(jsn.features[i].attributes.end)
-            row_obj.start = getFormattedDate(start)
-            row_obj.end = getFormattedDate(end)
+            row_obj.day = getFormattedDate(start)
+            row_obj.start = getFormattedTime(start)
+            row_obj.end = getFormattedTime(end)
             row_obj.address = jsn.features[i].attributes.address_street
             row_obj.zip = jsn.features[i].attributes.zip
 
@@ -307,33 +283,14 @@ $(document).foundation();
             if ('undefined' == typeof Addresses[Lmap.options.type][idx] ) {
                 Addresses[Lmap.options.type][idx] = []
             }
-
             Addresses[Lmap.options.type][idx].push(marker)
         })
-        for (var i = 0; i < jsn.features.length; i++) {
-            // extrapolate ward from precinct
-            ward = pad(jsn.features[i].attributes.precinct, 4).substr(0, 2)
-            marker = L.marker(jsn.features[i].coordinates, {
-                attributes: jsn.features[i].attributes,
-                icon: Icons[Lmap.options.iconType]
-            }).on('click', function() {
-                // zoom into this marker (without clearing set markers)
-                focusMap(Lmap, this)
-                // display event panel
-                showPanel(Lmap, this)
-            })
-            All[Lmap.options.type].push(marker)
-            if ('undefined' == typeof Wards[Lmap.options.type][ward]) {
-                Wards[Lmap.options.type][ward] = []
-            }
-            Wards[Lmap.options.type][ward].push(marker)
-        }
 
         // let's add markers with a uniform method
         addToMap(Lmap,Addresses[Lmap.options.type])
-        options += '<option class="option-text">-all-</option>'
+        options += "<option>-all-</option>"
         wards.forEach(function(idx, element) {
-            options += '<option class="option-text">' + idx + '</option>'
+            options += "<option>" + idx + "</option>"
         })
 
         link = L.control({ position: 'bottomleft' });
@@ -348,7 +305,7 @@ $(document).foundation();
         title = L.control({ position: 'topleft' });
         title.onAdd = function (Lmap) {
             var div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
-            div.innerHTML = '<h5 class="map-title">'+ All[Lmap.options.type].length +" "+Titles[Lmap.options.type]+' Demos</h5>';
+            div.innerHTML = '<h5 class="map-title">'+ Lmap.options.total +" "+Titles[Lmap.options.type]+' Demos</h5>';
             return div;
         };
         title.addTo(Lmap);
@@ -357,7 +314,7 @@ $(document).foundation();
         select = L.control({ position: 'topleft' })
         select.onAdd = function(Lmap) {
             var div = L.DomUtil.create('div', 'info legend');
-            div.innerHTML = '<div class="map-select">Filter by ward:</div><select class="option-text" id="' + Lmap.options.selectId + '">' + options + '</select>'
+            div.innerHTML = '<div class="map-select">Filter by ward:</div><select id="' + Lmap.options.selectId + '">' + options + '</select>'
             div.firstChild.onmousedown = div.firstChild.ondblclick = L.DomEvent.stopPropagation
             return div
         }
@@ -453,7 +410,7 @@ $(document).foundation();
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function (a) {
                 saddr=a.coords['latitude']+","+a.coords['longitude']
-
+                writePanel()
             }, writePanel, {timeout: 500})
         }
 
@@ -472,7 +429,7 @@ $(document).foundation();
                     if (dates.length) {
                         dates += ', '
                     }
-                    dates += getFormattedDate(start, end).replace(' ', '&nbsp;')
+                    dates += (getFormattedDate(start) + " " + getFormattedTime(start, end)).replace(' ', '&nbsp;')
                 }
                 daddr = (marker.options.attributes[0].address_street + ' Philadelphia PA ' + marker.options.attributes[0].zip).replace(" ", "+")
                 saddr = saddr ? saddr : 'My%20Location'
@@ -591,9 +548,6 @@ $(document).foundation();
 
     })
     W.Lmap = []
-    W.Lmap.getAll = function () {console.log('getAll',All)}
     W.Lmap.getActive = function () {console.log('getActive',Active)}
     W.Lmap.getAddresses = function () {console.log('getAddresses',Addresses)}
-    W.Lmap.getWards = function () {console.log('getWards',Wards)}
-
 }))

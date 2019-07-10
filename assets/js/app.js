@@ -83,6 +83,8 @@ $(document).foundation();
 
     // end ajax functions
 
+    // start map functions
+
     function setDefaultBasemaps(Lmap) {
         CN(arguments)
         if (BASEMAP1) {
@@ -104,87 +106,6 @@ $(document).foundation();
             Lmap.removeLayer(idx);
         });
         Active[Lmap.options.type] = []
-    }
-
-    // end map functions
-
-    // my utils
-
-    // utils
-    $.support.cors = true;
-
-    String.prototype.toProperCase = function() {
-        return this.replace(/\w\S*/g, function(a) {
-            return a.charAt(0).toUpperCase() + a.substr(1).toLowerCase();
-        });
-    };
-
-    function getFormattedDate(start) {
-        return 'M d, Y'
-            .replace('M', months[start.getMonth()])
-            .replace('d', start.getDate())
-            .replace('Y', start.getFullYear())
-    }
-
-    function getFormattedTime(start, end) {
-        if (start && end) {
-            return 'sT - eT'
-                .replace('sT', (start.getHours() == 0 ? "TBA" :
-                    (start.getHours() > 12 ? (start.getHours() % 12) : start.getHours() +
-                        (start.getMinutes() > 0 ? ':' + ('000' + start.getMinutes()).slice(-2) : '')
-                    ) +
-                    (start.getHours() >= 12 ? ' pm' : ' am')
-
-                ))
-                .replace('eT', (end.getHours() == 0 ? "TBA" :
-                    (end.getHours() > 12 ? (end.getHours() % 12) : end.getHours() +
-                        (end.getMinutes() > 0 ? ':' + ('000' + end.getMinutes()).slice(-2) : '')
-                    ) +
-                    (end.getHours() >= 12 ? ' pm' : ' am')
-                ))
-        }
-        if (start) {
-            return 'sT'
-                .replace('sT', (start.getHours() == 0 ? "TBA" :
-                    (start.getHours() > 12 ? (start.getHours() % 12) : start.getHours() +
-                        (start.getMinutes() > 0 ? ':' + ('000' + start.getMinutes()).slice(-2) : '')
-                    ) +
-                    (start.getHours() >= 12 ? ' pm' : ' am')
-
-                ))
-        }
-    }
-
-    function getWeekNumber(d) {
-        // Copy date so don't modify original
-        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-        // Set to nearest Thursday: current date + 4 - current day number
-        // Make Sunday's day number 7
-        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-        // Get first day of year
-        var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-        // Calculate full weeks to nearest Thursday
-        var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-        // Return array of year and week number
-        return [d.getUTCFullYear(), weekNo];
-    }
-
-    function pad(n, width, z) {
-        n = n + '' // cast to string
-        z = z || '0' // default padding: '0'
-        width = width || 2 // default digits: 2
-        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n
-    }
-
-    function CN(args) {
-
-        if (!DEBUG) {
-            return;
-        }
-        var re = /function (.*?)\(/;
-        var s = CN.caller.toString();
-        var m = re.exec(s);
-        console.log(m[1], args.length ? args : "");
     }
 
     function mapSetup(mapId, options) {
@@ -414,7 +335,7 @@ $(document).foundation();
             }, writePanel, { timeout: 500 })
         }
 
-        // Panels is module-level
+        // yes, this is intended to be embedded within showPanel
         function writePanel() {
             Panels[Lmap.options.type] = L.control({ position: 'bottomright' });
             Panels[Lmap.options.type].onAdd = function(Lmap) {
@@ -461,6 +382,71 @@ $(document).foundation();
         CN(arguments)
 
         panel.remove()
+    }
+
+    // end map functions
+
+    // my utils
+
+    // utils
+    $.support.cors = true;
+
+    function getFormattedDate(start) {
+        return 'M d, Y'
+            .replace('M', months[start.getMonth()])
+            .replace('d', start.getDate())
+            .replace('Y', start.getFullYear())
+    }
+
+    /*
+        Note:  getFormattedTime is not a generalized time formatting function due to one assumption:
+        ...any midnight (hour) time is taken to mean "TBA" regardless of minutes    
+     */
+    function getFormattedTime(start, end) {
+        if (start && end) {
+            return 'sT - eT'
+                .replace('sT', (start.getHours() == 0 ? "TBA" :
+                    (start.getHours() > 12 ? (start.getHours() % 12) : start.getHours() +
+                        (start.getMinutes() > 0 ? ':' + ('000' + start.getMinutes()).slice(-2) : '')
+                    ) +
+                    (start.getHours() >= 12 ? ' pm' : ' am')
+
+                ))
+                .replace('eT', (end.getHours() == 0 ? "TBA" :
+                    (end.getHours() > 12 ? (end.getHours() % 12) : end.getHours() +
+                        (end.getMinutes() > 0 ? ':' + ('000' + end.getMinutes()).slice(-2) : '')
+                    ) +
+                    (end.getHours() >= 12 ? ' pm' : ' am')
+                ))
+        }
+        if (start) {
+            return 'sT'
+                .replace('sT', (start.getHours() == 0 ? "TBA" :
+                    (start.getHours() > 12 ? (start.getHours() % 12) : start.getHours() +
+                        (start.getMinutes() > 0 ? ':' + ('000' + start.getMinutes()).slice(-2) : '')
+                    ) +
+                    (start.getHours() >= 12 ? ' pm' : ' am')
+
+                ))
+        }
+    }
+
+    function pad(n, width, z) {
+        n = n + '' // cast to string
+        z = z || '0' // default padding: '0'
+        width = width || 2 // default digits: 2
+        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n
+    }
+
+    function CN(args) {
+
+        if (!DEBUG) {
+            return;
+        }
+        var re = /function (.*?)\(/;
+        var s = CN.caller.toString();
+        var m = re.exec(s);
+        console.log(m[1], args.length ? args : "");
     }
 
     // events

@@ -340,7 +340,10 @@ $(document).foundation();
             Panels[Lmap.options.type] = L.control({ position: 'bottomright' });
             Panels[Lmap.options.type].onAdd = function(Lmap) {
                 var div = L.DomUtil.create('div', 'event-panel ' + Lmap.options.type),
+                    date = '',
                     dates = '',
+                    dates_short = '',
+                    dates_html = '',
                     daddr = marker.options.attributes[0].street_name,
                     title = '',
                     url = 'https://maps.google.com?saddr='
@@ -348,24 +351,28 @@ $(document).foundation();
                     var start = new Date(marker.options.attributes[i].start),
                         end = new Date(marker.options.attributes[i].end)
                     if (dates.length) {
-                        dates += ', '
+                        date = ', '
                     }
-                    dates += (getFormattedDate(start) + " " + getFormattedTime(start, end)).replace(' ', '&nbsp;')
+                    date += (getFormattedDate(start) + " " + getFormattedTime(start, end)).replace(' ', '&nbsp;')
+                    if (i < 15 ) {
+                        dates_short += date
+                    }
+                    dates += date
                 }
+                dates_html = '<span class="less">' + dates_short + ( dates.length == dates_short.length ? '' : ' <span>(click Download CSV for more)</span>' ) + '</span>'
+                //dates_html += '<span class="more hidden">' + dates + ' <span class="show-less">(less...)</span></span>'
                 daddr = (marker.options.attributes[0].address_street + ' Philadelphia PA ' + marker.options.attributes[0].zip).replace(" ", "+")
                 saddr = saddr ? saddr : 'My%20Location'
                 url += saddr + '&daddr=' + daddr
                 if (marker.options.attributes[0].display_title) {
                     title = '<tr><td>Event:</td><td>' + marker.options.attributes[0].display_title + '</td></tr>'
-
                 } else {
                     title = (marker.options.attributes[0].event_name ? '<tr><td>Event:</td><td>' + marker.options.attributes[0].event_name + '</td></tr>' : '') +
                         (marker.options.attributes[0].organization_name ? '<tr><td>Organization:</td><td>' + marker.options.attributes[0].organization_name + '</td></tr>' : '') +
                         (marker.options.attributes[0].location_name ? '<tr><td>Location:</td><td>' + marker.options.attributes[0].location_name + '</td></tr>' : '')
-
                 }
                 div.innerHTML = '<table>' +
-                    '<tr><td>Dates:</td><td colspan="2">' + dates + '</td></tr>' +
+                    '<tr><td>Dates:</td><td colspan="2">' + dates_html + '</td></tr>' +
                     (marker.options.attributes[0].title ? '<tr><td>Event:</td><td>' + marker.options.attributes[0].title + '</td></tr>' : '') +
                     title +
                     '<tr><td>Address:</td><td>' + marker.options.attributes[0].address_street + '</td></tr>' +
@@ -472,7 +479,7 @@ $(document).foundation();
         }
     });
 
-    $(D).on('click', '.event-panel', function() {
+    $(D).on('click', '.event-panel .close', function() {
         var Lmap
         if ($(this).hasClass(LmapPast.options.type)) {
             Lmap = LmapPast
@@ -483,18 +490,23 @@ $(document).foundation();
         removePanel(Panels[Lmap.options.type])
     })
 
+    $(D).on('click', '.show-less, .show-more', function (e) {
+        console.log(this)
+    })
+
     // navigation
     $(D).on('click', '.menu-item', function() {
         var segment = this.id.replace('menu-item-', ''),
-            next = $('#container-' + segment)[0],
-            last = $('.visible')[0]
-        $(last).removeClass('visible')
-        $(last).hide()
-        $(next).show()
-        $(next).addClass('visible')
+            $next = $($('#container-' + segment)[0]),
+            $last = $($('.visible')[0])
+        $last.removeClass('visible')
+        $last.hide()
+        $next.show()
+        $next.addClass('visible')
         $(".menu-item").removeClass('is-active')
         $(this).addClass('is-active')
     })
+
     // init
     $(function() {
         $('#container-usage').hide()
@@ -520,7 +532,7 @@ $(document).foundation();
         }).finally(function() {
             writeCSVLink(LmapPast)
             $('#container-demos').hide()
-            $('#menu-item-info').addClass('is-active')
+            $('#menu-item-info').trigger('click')//addClass('is-active')
             if (navigator.geolocation) {
                 setTimeout(function() {
                     navigator.geolocation.getCurrentPosition(function(a) {

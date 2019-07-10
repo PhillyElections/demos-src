@@ -20,7 +20,7 @@ $(document).foundation();
     scoped(window.jQuery, window.L, window, document)
 }(function($, L, W, D) {
     'use strict'
-    L.Icon.Default.imagePath='assets/img'
+    L.Icon.Default.imagePath = 'assets/img'
     var ie = /msie ([0-9]+)\.[0-9]+/.exec(navigator.userAgent.toLowerCase()),
         DEBUG = 0,
         GATEKEEPER_KEY = 'f2e3e82987f8a1ef78ca9d9d3cfc7f1d',
@@ -32,7 +32,7 @@ $(document).foundation();
         BASEMAP1_LABELS = '//tiles.arcgis.com/tiles/fLeGjb7u4uXqeF9q/arcgis/rest/services/CityBasemap_Labels/MapServer',
         BASEMAP2 = '//services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer',
         baseUri = W.baseUri,
-        Titles = {'past': 'Completed', 'future': 'Upcoming'},
+        Titles = { 'past': 'Completed', 'future': 'Upcoming' },
         Active = [],
         LmapFuture,
         LmapPast,
@@ -121,40 +121,37 @@ $(document).foundation();
 
     function getFormattedDate(start) {
         return 'M d, Y'
-                    .replace('M', months[start.getMonth()])
-                    .replace('d', start.getDate())
-                    .replace('Y', start.getFullYear())
+            .replace('M', months[start.getMonth()])
+            .replace('d', start.getDate())
+            .replace('Y', start.getFullYear())
     }
 
     function getFormattedTime(start, end) {
         if (start && end) {
             return 'sT - eT'
-                    .replace('sT', (start.getHours() == 0 ? "TBA" : 
-                                        (start.getHours() > 12 ? (start.getHours() % 12 ) : start.getHours() + 
-                                            (start.getMinutes() > 0 ? ':' + ('000'+start.getMinutes()).slice(-2) : '')
-                                            ) + 
-                                        (start.getHours() >= 12 ? ' pm' : ' am')
-                                        
-                                    )
-                            )
-                    .replace('eT', (end.getHours() == 0 ? "TBA" : 
-                                        (end.getHours() > 12 ? (end.getHours() % 12 ) : end.getHours() + 
-                                            (end.getMinutes() > 0 ? ':' + ('000'+end.getMinutes()).slice(-2) : '')
-                                            ) + 
-                                        (end.getHours() >= 12 ? ' pm' : ' am')
-                                    )
-                            )
+                .replace('sT', (start.getHours() == 0 ? "TBA" :
+                    (start.getHours() > 12 ? (start.getHours() % 12) : start.getHours() +
+                        (start.getMinutes() > 0 ? ':' + ('000' + start.getMinutes()).slice(-2) : '')
+                    ) +
+                    (start.getHours() >= 12 ? ' pm' : ' am')
+
+                ))
+                .replace('eT', (end.getHours() == 0 ? "TBA" :
+                    (end.getHours() > 12 ? (end.getHours() % 12) : end.getHours() +
+                        (end.getMinutes() > 0 ? ':' + ('000' + end.getMinutes()).slice(-2) : '')
+                    ) +
+                    (end.getHours() >= 12 ? ' pm' : ' am')
+                ))
         }
         if (start) {
             return 'sT'
-                    .replace('sT', (start.getHours() == 0 ? "TBA" : 
-                                        (start.getHours() > 12 ? (start.getHours() % 12 ) : start.getHours() + 
-                                            (start.getMinutes() > 0 ? ':' + ('000'+start.getMinutes()).slice(-2) : '')
-                                            ) + 
-                                        (start.getHours() >= 12 ? ' pm' : ' am')
-                                        
-                                    )
-                            )
+                .replace('sT', (start.getHours() == 0 ? "TBA" :
+                    (start.getHours() > 12 ? (start.getHours() % 12) : start.getHours() +
+                        (start.getMinutes() > 0 ? ':' + ('000' + start.getMinutes()).slice(-2) : '')
+                    ) +
+                    (start.getHours() >= 12 ? ' pm' : ' am')
+
+                ))
         }
     }
 
@@ -163,11 +160,11 @@ $(document).foundation();
         d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
         // Set to nearest Thursday: current date + 4 - current day number
         // Make Sunday's day number 7
-        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
         // Get first day of year
-        var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+        var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
         // Calculate full weeks to nearest Thursday
-        var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+        var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
         // Return array of year and week number
         return [d.getUTCFullYear(), weekNo];
     }
@@ -180,21 +177,21 @@ $(document).foundation();
     }
 
     function CN(args) {
-        
+
         if (!DEBUG) {
             return;
         }
         var re = /function (.*?)\(/;
         var s = CN.caller.toString();
         var m = re.exec(s);
-        console.log(m[1],args.length ? args : "");
+        console.log(m[1], args.length ? args : "");
     }
 
     function mapSetup(mapId, options) {
         CN(arguments)
 
         D.getElementById(mapId).style.zIndex = 1
-        var Lmap = L.map(mapId, { zoomControl: false } ).setView(CITY_HALL, ZOOM)
+        var Lmap = L.map(mapId, { zoomControl: false }).setView(CITY_HALL, ZOOM)
         Lmap.options.minZoom = MINZOOM
         Lmap.options.maxZoom = MAXZOOM
         Object.keys(options).forEach(function(idx) {
@@ -204,7 +201,7 @@ $(document).foundation();
         new L.Control.Zoom({ position: 'topright' }).addTo(Lmap);
 
         // map events setup
-        Lmap.on('zoom', function(e) { })
+        Lmap.on('zoom', function(e) {})
 
         // set up layers
         setDefaultBasemaps(Lmap)
@@ -215,8 +212,10 @@ $(document).foundation();
     function setInitialMarkers(Lmap, jsn) {
         CN(arguments)
 
-        var addresses = [], ward, link, select, title, marker, row_obj, wards = [],
-            options = '', start, end
+        var addresses = [],
+            ward, link, select, title, marker, row_obj, wards = [],
+            options = '',
+            start, end
 
         // setup our 'global' arrays
         // active 
@@ -232,13 +231,13 @@ $(document).foundation();
         for (var i = 0; i < jsn.features.length; i++) {
             ward = pad(jsn.features[i].attributes.precinct, 4).substr(0, 2)
             // instantiate array segment if needed
-            if ('undefined' == typeof addresses[ward+'|'+jsn.features[i].attributes.address_street]) {
-                addresses[ward+'|'+jsn.features[i].attributes.address_street]=[]
+            if ('undefined' == typeof addresses[ward + '|' + jsn.features[i].attributes.address_street]) {
+                addresses[ward + '|' + jsn.features[i].attributes.address_street] = []
             }
             if ('undefined' == typeof wards[Number(ward)]) {
                 wards[Number(ward)] = ward
             }
-            addresses[ward+'|'+jsn.features[i].attributes.address_street].push(jsn.features[i])
+            addresses[ward + '|' + jsn.features[i].attributes.address_street].push(jsn.features[i])
 
             // refresh array
             row_obj = []
@@ -264,10 +263,11 @@ $(document).foundation();
             Lmap.options.csv_array.push(row_obj)
 
         }
-        Object.keys(addresses).forEach(function (idx) {
-            var attributes = [], coordinates
+        Object.keys(addresses).forEach(function(idx) {
+            var attributes = [],
+                coordinates
             coordinates = addresses[idx][0].coordinates
-            for (var i=0;i<addresses[idx].length;i++) {
+            for (var i = 0; i < addresses[idx].length; i++) {
                 attributes.push(addresses[idx][i].attributes)
             }
             marker = L.marker(coordinates, {
@@ -280,32 +280,32 @@ $(document).foundation();
                 showPanel(Lmap, this)
             })
 
-            if ('undefined' == typeof Addresses[Lmap.options.type][idx] ) {
+            if ('undefined' == typeof Addresses[Lmap.options.type][idx]) {
                 Addresses[Lmap.options.type][idx] = []
             }
             Addresses[Lmap.options.type][idx].push(marker)
         })
 
         // let's add markers with a uniform method
-        addToMap(Lmap,Addresses[Lmap.options.type])
+        addToMap(Lmap, Addresses[Lmap.options.type])
         options += "<option>-all-</option>"
         wards.forEach(function(idx, element) {
             options += "<option>" + idx + "</option>"
         })
 
         link = L.control({ position: 'bottomleft' });
-        link.onAdd = function (Lmap) {
+        link.onAdd = function(Lmap) {
             var div = L.DomUtil.create('div', 'leaflet-control-attribution'); // create a div with a class "info"
-            div.innerHTML = '<a id="'+Lmap.options.type+'_download">Download CSV</a>';
+            div.innerHTML = '<a id="' + Lmap.options.type + '_download">Download CSV</a>';
             return div;
         };
         link.addTo(Lmap);
 
         // set title for this map
         title = L.control({ position: 'topleft' });
-        title.onAdd = function (Lmap) {
+        title.onAdd = function(Lmap) {
             var div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
-            div.innerHTML = '<h5 class="map-title">'+ Lmap.options.total +" "+Titles[Lmap.options.type]+' Demos</h5>';
+            div.innerHTML = '<h5 class="map-title">' + Lmap.options.total + " " + Titles[Lmap.options.type] + ' Demos</h5>';
             return div;
         };
         title.addTo(Lmap);
@@ -322,31 +322,31 @@ $(document).foundation();
 
         // rewire default click and dbleclick
         Lmap.off('click').on('click', function() {
-            var lmap=this
-            if (D.querySelectorAll(".event-panel."+lmap.options.type).length)
+            var lmap = this
+            if (D.querySelectorAll(".event-panel." + lmap.options.type).length)
                 removePanel(Panels[lmap.options.type])
             if (lmap.getZoom() == MINZOOM) return
 
             // use the existing event wiring
-            $('#wards_'+lmap.options.type).change()
+            $('#wards_' + lmap.options.type).change()
         })
         Lmap.off('dblclick').on('dblclick', function() {
-            var lmap=this
-            if (D.querySelectorAll(".event-panel."+lmap.options.type).length)
+            var lmap = this
+            if (D.querySelectorAll(".event-panel." + lmap.options.type).length)
                 removePanel(Panels[lmap.options.type])
             if (lmap.getZoom() == MINZOOM) return
 
-            $('#wards_'+lmap.options.type).val('-all-')
+            $('#wards_' + lmap.options.type).val('-all-')
             // use the existing event wiring
-            $('#wards_'+lmap.options.type).change()
+            $('#wards_' + lmap.options.type).change()
         })
     }
 
     function addToMap(Lmap, markers) {
         CN(arguments)
-        
+
         Object.keys(markers).forEach(function(idx) {
-            for (var i=0;i<markers[idx].length; i++) {
+            for (var i = 0; i < markers[idx].length; i++) {
                 Active[Lmap.options.type].push(markers[idx][i])
                 markers[idx][i].addTo(Lmap)
             }
@@ -378,7 +378,7 @@ $(document).foundation();
         function obj2CSVRow(dataObject) {
             var dataArray = new Array;
             for (var o in dataObject) {
-                var innerValue = dataObject[o]===null?'':dataObject[o].toString();
+                var innerValue = dataObject[o] === null ? '' : dataObject[o].toString();
                 var result = innerValue.replace(/"/g, '""');
                 result = '"' + result + '"';
                 dataArray.push(result);
@@ -390,14 +390,14 @@ $(document).foundation();
         content += obj2CSVRow(Object.keys(csv_array[0]));
 
         //rows
-        Object.keys(csv_array).forEach(function(item){
+        Object.keys(csv_array).forEach(function(item) {
             content += obj2CSVRow(csv_array[item]);
-        }); 
+        });
 
         var encodedUri = encodeURI(content);
-        var link = D.getElementById(Lmap.options.type+'_download')
+        var link = D.getElementById(Lmap.options.type + '_download')
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", Lmap.options.type+"_events.csv");
+        link.setAttribute("download", Lmap.options.type + "_events.csv");
     }
 
     function showPanel(Lmap, marker) {
@@ -408,10 +408,10 @@ $(document).foundation();
         }
 
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function (a) {
-                saddr=a.coords['latitude']+","+a.coords['longitude']
+            navigator.geolocation.getCurrentPosition(function(a) {
+                saddr = a.coords['latitude'] + "," + a.coords['longitude']
                 writePanel()
-            }, writePanel, {timeout: 500})
+            }, writePanel, { timeout: 500 })
         }
 
         // Panels is module-level
@@ -422,8 +422,8 @@ $(document).foundation();
                     dates = '',
                     daddr = marker.options.attributes[0].street_name,
                     title = '',
-                    url ='https://maps.google.com?saddr='
-                for (var i=0;i<marker.options.attributes.length;i++) {
+                    url = 'https://maps.google.com?saddr='
+                for (var i = 0; i < marker.options.attributes.length; i++) {
                     var start = new Date(marker.options.attributes[i].start),
                         end = new Date(marker.options.attributes[i].end)
                     if (dates.length) {
@@ -438,17 +438,17 @@ $(document).foundation();
                     title = '<tr><td>Event:</td><td>' + marker.options.attributes[0].display_title + '</td></tr>'
 
                 } else {
-                    title = (marker.options.attributes[0].event_name ? '<tr><td>Event:</td><td>' + marker.options.attributes[0].event_name + '</td></tr>' : '' ) +
-                            (marker.options.attributes[0].organization_name ? '<tr><td>Organization:</td><td>' + marker.options.attributes[0].organization_name + '</td></tr>' : '' ) +
-                            (marker.options.attributes[0].location_name ? '<tr><td>Location:</td><td>' + marker.options.attributes[0].location_name + '</td></tr>' : '' ) 
+                    title = (marker.options.attributes[0].event_name ? '<tr><td>Event:</td><td>' + marker.options.attributes[0].event_name + '</td></tr>' : '') +
+                        (marker.options.attributes[0].organization_name ? '<tr><td>Organization:</td><td>' + marker.options.attributes[0].organization_name + '</td></tr>' : '') +
+                        (marker.options.attributes[0].location_name ? '<tr><td>Location:</td><td>' + marker.options.attributes[0].location_name + '</td></tr>' : '')
 
                 }
                 div.innerHTML = '<table>' +
                     '<tr><td>Dates:</td><td colspan="2">' + dates + '</td></tr>' +
-                    (marker.options.attributes[0].title ? '<tr><td>Event:</td><td>' + marker.options.attributes[0].title + '</td></tr>' : '' ) +
+                    (marker.options.attributes[0].title ? '<tr><td>Event:</td><td>' + marker.options.attributes[0].title + '</td></tr>' : '') +
                     title +
                     '<tr><td>Address:</td><td>' + marker.options.attributes[0].address_street + '</td></tr>' +
-                    '<tr><td colspan="2"><a href="'+url+'" target="_blank">Directions</a></td></tr>' +
+                    '<tr><td colspan="2"><a href="' + url + '" target="_blank">Directions</a></td></tr>' +
                     '</table>'
                 return div
             }
@@ -478,7 +478,7 @@ $(document).foundation();
             addToMap(Lmap, Addresses[Lmap.options.type])
         } else {
             Object.keys(Addresses[Lmap.options.type]).forEach(function(idx) {
-                if (idx.substr(0,2) == ward) {
+                if (idx.substr(0, 2) == ward) {
                     ward_markers.push(Addresses[Lmap.options.type][idx])
                 }
             })
@@ -498,10 +498,10 @@ $(document).foundation();
     })
 
     // navigation
-    $(D).on('click', '.menu-item', function () {
-        var segment = this.id.replace('menu-item-',''),
-            next=$('#container-'+segment)[0],
-            last=$('.visible')[0]
+    $(D).on('click', '.menu-item', function() {
+        var segment = this.id.replace('menu-item-', ''),
+            next = $('#container-' + segment)[0],
+            last = $('.visible')[0]
         $(last).removeClass('visible')
         $(last).hide()
         $(next).show()
@@ -519,35 +519,35 @@ $(document).foundation();
 
         getMarkersPromise(Services.demos_future).then(function(data) {
             var json = JSON.parse(data)
-            setInitialMarkers(LmapFuture, json )
-        }).catch(function (error) {
+            setInitialMarkers(LmapFuture, json)
+        }).catch(function(error) {
             console.log('error:', error)
-        }).finally(function () {
+        }).finally(function() {
             writeCSVLink(LmapFuture)
         })
 
         getMarkersPromise(Services.demos_past).then(function(data) {
             var json = JSON.parse(data)
             setInitialMarkers(LmapPast, json)
-        }).catch(function (error) {
+        }).catch(function(error) {
             console.log('error:', error)
-        }).finally(function () {
+        }).finally(function() {
             writeCSVLink(LmapPast)
             $('#container-demos').hide()
             $('#menu-item-info').addClass('is-active')
             if (navigator.geolocation) {
-                setTimeout( function() {
-                    navigator.geolocation.getCurrentPosition(function (a) {
+                setTimeout(function() {
+                    navigator.geolocation.getCurrentPosition(function(a) {
                         // success.  do nothing.
-                    }, function () {
+                    }, function() {
                         console.log("initial geolocation failed")
-                    }, {timeout: 500})                    
+                    }, { timeout: 500 })
                 }, 1000)
             }
         })
 
     })
     W.Lmap = []
-    W.Lmap.getActive = function () {console.log('getActive',Active)}
-    W.Lmap.getAddresses = function () {console.log('getAddresses',Addresses)}
+    W.Lmap.getActive = function() { console.log('getActive', Active) }
+    W.Lmap.getAddresses = function() { console.log('getAddresses', Addresses) }
 }))

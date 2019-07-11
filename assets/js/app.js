@@ -244,8 +244,9 @@ $(document).foundation();
         // rewire default click and dbleclick
         Lmap.off('click').on('click', function() {
             var lmap = this
+            console.log(Lmap.options.type, "click")
             if (D.querySelectorAll(".event-panel." + lmap.options.type).length)
-                removePanel(Panels[lmap.options.type])
+//                removePanel(Panels[lmap.options.type])
             if (lmap.getZoom() == MINZOOM) return
 
             // use the existing event wiring
@@ -479,6 +480,18 @@ $(document).foundation();
         }
     });
 
+    $(D).on('click', '.event-panel', function() {
+        console.log("click: .event-panel")
+/*        var Lmap
+        if ($(this).hasClass(LmapPast.options.type)) {
+            Lmap = LmapPast
+        } else {
+            Lmap = LmapFuture
+        }
+
+        removePanel(Panels[Lmap.options.type])
+*/    })
+
     $(D).on('click', '.event-panel .close', function() {
         var Lmap
         if ($(this).hasClass(LmapPast.options.type)) {
@@ -490,9 +503,6 @@ $(document).foundation();
         removePanel(Panels[Lmap.options.type])
     })
 
-    $(D).on('click', '.show-less, .show-more', function (e) {
-        console.log(this)
-    })
 
     // navigation
     $(D).on('click', '.menu-item', function() {

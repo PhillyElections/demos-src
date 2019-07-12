@@ -86,7 +86,7 @@ $(document).foundation();
     // start map functions
 
     function setDefaultBasemaps(Lmap) {
-        CN(arguments)
+        DEBUG ? console.log('setDefaultBasemaps') : ''
         if (BASEMAP1) {
             L.esri.tiledMapLayer({
                 url: BASEMAP1
@@ -100,7 +100,7 @@ $(document).foundation();
     }
 
     function clearMarkers(Lmap) {
-        CN(arguments)
+        DEBUG ? console.log('clearMarkers') : ''
 
         Active[Lmap.options.type].forEach(function(idx) {
             Lmap.removeLayer(idx);
@@ -109,7 +109,7 @@ $(document).foundation();
     }
 
     function mapSetup(mapId, options) {
-        CN(arguments)
+        DEBUG ? console.log('mapSetup') : ''
 
         D.getElementById(mapId).style.zIndex = 1
         var Lmap = L.map(mapId, { zoomControl: false }).setView(CITY_HALL, ZOOM)
@@ -131,7 +131,7 @@ $(document).foundation();
     }
 
     function setInitialMarkers(Lmap, jsn) {
-        CN(arguments)
+        DEBUG ? console.log('setInitialMarkers') : ''
 
         var addresses = [],
             ward, link, select, title, marker, row_obj, wards = [],
@@ -242,30 +242,12 @@ $(document).foundation();
         select.addTo(Lmap)
 
         // rewire default click and dbleclick
-        Lmap.off('click').on('click', function() {
-            var lmap = this
-            console.log(Lmap.options.type, "click")
-            if (D.querySelectorAll(".event-panel." + lmap.options.type).length)
-//                removePanel(Panels[lmap.options.type])
-            if (lmap.getZoom() == MINZOOM) return
-
-            // use the existing event wiring
-            $('#wards_' + lmap.options.type).change()
-        })
-        Lmap.off('dblclick').on('dblclick', function() {
-            var lmap = this
-            if (D.querySelectorAll(".event-panel." + lmap.options.type).length)
-                removePanel(Panels[lmap.options.type])
-            if (lmap.getZoom() == MINZOOM) return
-
-            $('#wards_' + lmap.options.type).val('-all-')
-            // use the existing event wiring
-            $('#wards_' + lmap.options.type).change()
-        })
+        clearNativeMapEvents(Lmap)
+        setCustomMapEvents(Lmap)
     }
 
     function addToMap(Lmap, markers) {
-        CN(arguments)
+        DEBUG ? console.log('addToMap') : ''
 
         Object.keys(markers).forEach(function(idx) {
             for (var i = 0; i < markers[idx].length; i++) {
@@ -277,7 +259,7 @@ $(document).foundation();
     }
 
     function focusMap(Lmap, marker) {
-        CN(arguments)
+        DEBUG ? console.log('focusMap') : ''
 
         var FeatureGroup, markers = []
         if (!marker) {
@@ -293,10 +275,11 @@ $(document).foundation();
     }
 
     function writeCSVLink(Lmap) {
-        CN(arguments)
+        DEBUG ? console.log('writeCSVLink') : ''
         var csv_array = Lmap.options.csv_array,
             content = "data:text/csv;charset=utf-8,"
 
+        // yes, this is intended to be embedded
         function obj2CSVRow(dataObject) {
             var dataArray = new Array;
             for (var o in dataObject) {
@@ -323,7 +306,7 @@ $(document).foundation();
     }
 
     function showPanel(Lmap, marker) {
-        CN(arguments)
+        DEBUG ? console.log('showPanel') : ''
         var saddr = ''
         if (Panels[Lmap.options.type]) {
             Panels[Lmap.options.type].remove()
@@ -336,7 +319,7 @@ $(document).foundation();
             }, writePanel, { timeout: 500 })
         }
 
-        // yes, this is intended to be embedded within showPanel
+        // yes, this is intended to be embedded
         function writePanel() {
             Panels[Lmap.options.type] = L.control({ position: 'bottomright' });
             Panels[Lmap.options.type].onAdd = function(Lmap) {
@@ -355,13 +338,15 @@ $(document).foundation();
                         date = ', '
                     }
                     date += (getFormattedDate(start) + " " + getFormattedTime(start, end)).replace(' ', '&nbsp;')
-                    if (i < 15 ) {
+                    if (i < 10) {
                         dates_short += date
                     }
                     dates += date
                 }
-                dates_html = '<span class="less">' + dates_short + ( dates.length == dates_short.length ? '' : ' <span>(click Download CSV for more)</span>' ) + '</span>'
-                //dates_html += '<span class="more hidden">' + dates + ' <span class="show-less">(less...)</span></span>'
+                dates_html = '<span class="less">' + dates_short + (dates.length == dates_short.length ? '' : ' <span class="show-more">(more...)</span>') + '</span>'
+                if (dates.length != dates_short.length) {
+                    dates_html += '<span class="more hidden">' + dates + ' <span class="show-less">(less...)</span></span>'
+                }
                 daddr = (marker.options.attributes[0].address_street + ' Philadelphia PA ' + marker.options.attributes[0].zip).replace(" ", "+")
                 saddr = saddr ? saddr : 'My%20Location'
                 url += saddr + '&daddr=' + daddr
@@ -387,7 +372,7 @@ $(document).foundation();
     }
 
     function removePanel(panel) {
-        CN(arguments)
+        DEBUG ? console.log('removePanel') : ''
 
         panel.remove()
     }
@@ -400,6 +385,7 @@ $(document).foundation();
     $.support.cors = true;
 
     function getFormattedDate(start) {
+        DEBUG ? console.log('getFormattedDate') : ''
         return 'M d, Y'
             .replace('M', months[start.getMonth()])
             .replace('d', start.getDate())
@@ -411,6 +397,7 @@ $(document).foundation();
         ...any midnight (hour) time is taken to mean "TBA" regardless of minutes    
      */
     function getFormattedTime(start, end) {
+        DEBUG ? console.log('getFormattedTime') : ''
         if (start && end) {
             return 'sT - eT'
                 .replace('sT', (start.getHours() == 0 ? "TBA" :
@@ -457,8 +444,103 @@ $(document).foundation();
         console.log(m[1], args.length ? args : "");
     }
 
+    function clearNativeMapEvents(Lmap) {
+        Lmap.off('click')
+        Lmap.off('dblclick')
+    }
+
+    function setCustomMapEvents(Lmap) {
+        Lmap.on('click', clickLmap)
+        Lmap.on('dblclick', dblClickLmap)
+    }
     // events
-    $(D).on('change', '#wards_future, #wards_past', function(e) {
+
+    function clickLmap() {
+        DEBUG ? console.log('clickLmap') : ''
+        var lmap = this
+
+        if (D.querySelectorAll(".event-panel." + lmap.options.type).length)
+            removePanel(Panels[lmap.options.type])
+        if (lmap.getZoom() == MINZOOM) return
+
+        // use the existing event wiring
+        $('#wards_' + lmap.options.type).change()
+    }
+
+    function dblClickLmap() {
+        DEBUG ? console.log('dblClickLmap') : ''
+        var lmap = this
+        if (D.querySelectorAll(".event-panel." + lmap.options.type).length)
+            removePanel(Panels[lmap.options.type])
+        if (lmap.getZoom() == MINZOOM) return
+
+        $('#wards_' + lmap.options.type).val('-all-')
+        // use the existing event wiring
+        $('#wards_' + lmap.options.type).change()
+    }
+
+/*    function clickEventPanel(e) {
+        DEBUG ? console.log('clickEventPanel') : ''
+        var Lmap
+        if ($(this).hasClass(LmapPast.options.type)) {
+            Lmap = LmapPast
+        } else {
+            Lmap = LmapFuture
+        }
+
+        //        removePanel(Panels[Lmap.options.type])
+    }*/
+
+    function showMore() {
+        DEBUG ? console.log('clickEventPanelLink') : ''
+        var $this = $(this),
+            $parent = $this.parent(),
+            $next = $parent.next()
+
+
+        if ($next.hasClass('hidden')) {
+            $next.hide()
+            $next.removeClass('hidden')
+
+        }
+        $(D).off('mouseover', '.event-panel .show-less')
+        $parent.hide(100)
+        $next.slideDown(100)
+        setTimeout(function () { $(D).on('mouseover', '.event-panel .show-less', showLess) }, 500)
+    }
+
+    function showLess() {
+        DEBUG ? console.log('clickEventPanelLink') : ''
+        var $this = $(this),
+            $parent = $this.parent(),
+            $previous = $parent.prev()
+
+
+        $(D).off('mouseover', '.event-panel .show-more')
+        $parent.hide(100)
+        $previous.slideDown(100)
+        setTimeout(function () { $(D).on('mouseover', '.event-panel .show-more', showMore) }, 500)
+    }
+
+    function clickMenuItem() {
+        DEBUG ? console.log('clickMenuItem') : ''
+        var segment = this.id.replace('menu-item-', ''),
+            $next = $($('#container-' + segment)[0]),
+            $last = $($('.visible')[0])
+        // don't navigate if no navigation
+        if ($next[0].id == $last[0].id) {
+            return
+        }
+        $last.removeClass('visible')
+        $last.slideUp(100)
+        $next.slideDown(100)
+        $next.addClass('visible')
+        $(".menu-item").removeClass('is-active')
+        $(this).addClass('is-active')
+    }
+
+    function changeWardsOption() {
+        DEBUG ? console.log('changeWardsOption') : ''
         var ward = $('option:selected', this).text(),
             Lmap,
             ward_markers = []
@@ -478,44 +560,18 @@ $(document).foundation();
             })
             addToMap(Lmap, ward_markers)
         }
-    });
+    }
 
-    $(D).on('click', '.event-panel', function() {
-        console.log("click: .event-panel")
-/*        var Lmap
-        if ($(this).hasClass(LmapPast.options.type)) {
-            Lmap = LmapPast
-        } else {
-            Lmap = LmapFuture
-        }
+    // event hooks
+//    $(D).on('click', '.event-panel', clickEventPanel)
 
-        removePanel(Panels[Lmap.options.type])
-*/    })
+    $(D).on('mouseover', '.event-panel .show-more', showMore)
 
-    $(D).on('click', '.event-panel .close', function() {
-        var Lmap
-        if ($(this).hasClass(LmapPast.options.type)) {
-            Lmap = LmapPast
-        } else {
-            Lmap = LmapFuture
-        }
+    $(D).on('mouseover', '.event-panel .show-less', showLess)
 
-        removePanel(Panels[Lmap.options.type])
-    })
+    $(D).on('click', '.menu-item', clickMenuItem)
 
-
-    // navigation
-    $(D).on('click', '.menu-item', function() {
-        var segment = this.id.replace('menu-item-', ''),
-            $next = $($('#container-' + segment)[0]),
-            $last = $($('.visible')[0])
-        $last.removeClass('visible')
-        $last.hide()
-        $next.show()
-        $next.addClass('visible')
-        $(".menu-item").removeClass('is-active')
-        $(this).addClass('is-active')
-    })
+    $(D).on('change', '#wards_future, #wards_past', changeWardsOption);
 
     // init
     $(function() {
@@ -542,7 +598,7 @@ $(document).foundation();
         }).finally(function() {
             writeCSVLink(LmapPast)
             $('#container-demos').hide()
-            $('#menu-item-info').trigger('click')//addClass('is-active')
+            $('#menu-item-info').addClass('is-active')
             if (navigator.geolocation) {
                 setTimeout(function() {
                     navigator.geolocation.getCurrentPosition(function(a) {

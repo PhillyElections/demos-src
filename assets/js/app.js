@@ -136,7 +136,7 @@ $(document).foundation();
         var addresses = [],
             ward, link, select, title, marker, row_obj, wards = [],
             options = '',
-            start, end
+            start, end, date_start, date_end
 
         // setup our 'global' arrays
         // active 
@@ -162,12 +162,14 @@ $(document).foundation();
 
             // refresh array
             row_obj = []
-
-            start = new Date(jsn.features[i].attributes.start)
-            end = new Date(jsn.features[i].attributes.end)
-            row_obj.day = getFormattedDate(start)
-            row_obj.start = getFormattedTime(start)
-            row_obj.end = getFormattedTime(end)
+            start = jsn.features[i].attributes.start
+            end = jsn.features[i].attributes.end
+            console.log(start, start.substr(0,4), start.substr(5,2), start.substr(8,2), start.substr(11,2), start.substr(14,2), start.substr(17,2))
+            date_start = new Date(start.substr(0,4), start.substr(5,2), start.substr(8,2), start.substr(11,2), start.substr(14,2), start.substr(17,2))
+            date_end = new Date(end.substr(0,4), end.substr(5,2), end.substr(8,2), end.substr(11,2), end.substr(14,2), end.substr(17,2))
+            row_obj.day = getFormattedDate(date_start)
+            row_obj.start = getFormattedTime(date_start)
+            row_obj.end = getFormattedTime(date_end)
             row_obj.address = jsn.features[i].attributes.address_street
             row_obj.zip = jsn.features[i].attributes.zip
 
@@ -332,12 +334,14 @@ $(document).foundation();
                     title = '',
                     url = 'https://maps.google.com?saddr='
                 for (var i = 0; i < marker.options.attributes.length; i++) {
-                    var start = new Date(marker.options.attributes[i].start),
-                        end = new Date(marker.options.attributes[i].end)
+                    var start = marker.options.attributes[i].start,
+                        end = marker.options.attributes[i].end,
+                        date_start = new Date(start.substr(0,4), start.substr(5,2), start.substr(8,2), start.substr(11,2), start.substr(14,2), start.substr(17,2)),
+                        date_end = new Date(end.substr(0,4), end.substr(5,2), end.substr(8,2), end.substr(11,2), end.substr(14,2), end.substr(17,2))
                     if (dates.length) {
                         date = ', '
                     }
-                    date += (getFormattedDate(start) + " " + getFormattedTime(start, end)).replace(' ', '&nbsp;')
+                    date += (getFormattedDate(date_start) + " " + getFormattedTime(date_start, date_end)).replace(' ', '&nbsp;')
                     if (i < 10) {
                         dates_short += date
                     }
@@ -386,20 +390,20 @@ $(document).foundation();
 
     function getFormattedDate(start) {
         DEBUG ? console.log('getFormattedDate') : ''
-        return 'M d, Y'
+        var value = 'M d, Y'
             .replace('M', months[start.getMonth()])
             .replace('d', start.getDate())
             .replace('Y', start.getFullYear())
+        return value
     }
 
-    /*
-        Note:  getFormattedTime is not a generalized time formatting function due to one assumption:
-        ...any midnight (hour) time is taken to mean "TBA" regardless of minutes    
-     */
+    //    Note:  getFormattedTime is not a generalized time formatting function due to one assumption:
+    //    ...any midnight (hour) time is taken to mean "TBA" regardless of minutes    
     function getFormattedTime(start, end) {
         DEBUG ? console.log('getFormattedTime') : ''
+        var value = ''
         if (start && end) {
-            return 'sT - eT'
+            value = 'sT - eT'
                 .replace('sT', (start.getHours() == 0 ? "TBA" :
                     (start.getHours() > 12 ? (start.getHours() % 12) : start.getHours() +
                         (start.getMinutes() > 0 ? ':' + ('000' + start.getMinutes()).slice(-2) : '')
@@ -413,9 +417,8 @@ $(document).foundation();
                     ) +
                     (end.getHours() >= 12 ? ' pm' : ' am')
                 ))
-        }
-        if (start) {
-            return 'sT'
+        } else {
+            value = 'sT'
                 .replace('sT', (start.getHours() == 0 ? "TBA" :
                     (start.getHours() > 12 ? (start.getHours() % 12) : start.getHours() +
                         (start.getMinutes() > 0 ? ':' + ('000' + start.getMinutes()).slice(-2) : '')
@@ -424,6 +427,7 @@ $(document).foundation();
 
                 ))
         }
+        return value
     }
 
     function pad(n, width, z) {
@@ -478,18 +482,6 @@ $(document).foundation();
         // use the existing event wiring
         $('#wards_' + lmap.options.type).change()
     }
-
-/*    function clickEventPanel(e) {
-        DEBUG ? console.log('clickEventPanel') : ''
-        var Lmap
-        if ($(this).hasClass(LmapPast.options.type)) {
-            Lmap = LmapPast
-        } else {
-            Lmap = LmapFuture
-        }
-
-        //        removePanel(Panels[Lmap.options.type])
-    }*/
 
     function showMore() {
         DEBUG ? console.log('clickEventPanelLink') : ''
@@ -563,7 +555,6 @@ $(document).foundation();
     }
 
     // event hooks
-//    $(D).on('click', '.event-panel', clickEventPanel)
 
     $(D).on('mouseover', '.event-panel .show-more', showMore)
 

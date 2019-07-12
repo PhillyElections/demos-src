@@ -136,7 +136,7 @@ $(document).foundation();
         var addresses = [],
             ward, link, select, title, marker, row_obj, wards = [],
             options = '',
-            start, end
+            start, end, date_start, date_end
 
         // setup our 'global' arrays
         // active 
@@ -162,12 +162,14 @@ $(document).foundation();
 
             // refresh array
             row_obj = []
+            start = jsn.features[i].attributes.start
+            end = jsn.features[i].attributes.end
+            date_start = new Date(start.substr(0,4), start.substr(5,2), start.substr(8,2), start.substr(11,2), start.substr(14,2), start.substr(17,2))
+            date_end = new Date(end.substr(0,4), end.substr(5,2), end.substr(8,2), end.substr(11,2), end.substr(14,2), end.substr(17,2))
 
-            start = new Date(jsn.features[i].attributes.start)
-            end = new Date(jsn.features[i].attributes.end)
-            row_obj.day = getFormattedDate(start)
-            row_obj.start = getFormattedTime(start)
-            row_obj.end = getFormattedTime(end)
+            row_obj.day = getFormattedDate(date_start)
+            row_obj.start = getFormattedTime(date_start)
+            row_obj.end = getFormattedTime(date_end)
             row_obj.address = jsn.features[i].attributes.address_street
             row_obj.zip = jsn.features[i].attributes.zip
 
@@ -349,18 +351,20 @@ $(document).foundation();
                     title = '',
                     url = 'https://maps.google.com?saddr='
                 for (var i = 0; i < marker.options.attributes.length; i++) {
-                    var start = new Date(marker.options.attributes[i].start),
-                        end = new Date(marker.options.attributes[i].end)
+                    var start = marker.options.attributes[i].start,
+                        end = marker.options.attributes[i].end,
+                        date_start = new Date(start.substr(0,4), start.substr(5,2), start.substr(8,2), start.substr(11,2), start.substr(14,2), start.substr(17,2)),
+                        date_end = new Date(end.substr(0,4), end.substr(5,2), end.substr(8,2), end.substr(11,2), end.substr(14,2), end.substr(17,2))
                     if (dates.length) {
                         date = ', '
                     }
-                    date += (getFormattedDate(start) + " " + getFormattedTime(start, end)).replace(' ', '&nbsp;')
-                    if (i < 15 ) {
+                    date += (getFormattedDate(date_start) + " " + getFormattedTime(date_start, date_end)).replace(' ', '&nbsp;')
+                    if (i < 10) {
                         dates_short += date
                     }
                     dates += date
                 }
-                dates_html = '<span class="less">' + dates_short + ( dates.length == dates_short.length ? '' : ' <span>(click Download CSV for more)</span>' ) + '</span>'
+                dates_html = '<span class="less">' + dates + ( dates.length == dates.length ? '' : ' <span>(click Download CSV for more)</span>' ) + '</span>'
                 //dates_html += '<span class="more hidden">' + dates + ' <span class="show-less">(less...)</span></span>'
                 daddr = (marker.options.attributes[0].address_street + ' Philadelphia PA ' + marker.options.attributes[0].zip).replace(" ", "+")
                 saddr = saddr ? saddr : 'My%20Location'

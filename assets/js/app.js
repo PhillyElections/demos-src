@@ -545,11 +545,11 @@ $(document).foundation();
             Lmap = LmapFuture
         }
         clearMarkers(Lmap)
-        if ('-all-' == ward) {
+        if (ward == '-all-') {
             addToMap(Lmap, Addresses[Lmap.options.type])
         } else {
             Object.keys(Addresses[Lmap.options.type]).forEach(function(idx) {
-                if (idx.substr(0, 2) == ward) {
+                if (ward == idx.substr(0, 2)) {
                     ward_markers.push(Addresses[Lmap.options.type][idx])
                 }
             })

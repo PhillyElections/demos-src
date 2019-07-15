@@ -94,7 +94,7 @@ option.option-text, select.option-text {
 }
 
 .logo {
-	width: 250px;
+  width: 250px;
   -webkit-filter: drop-shadow( 0 0 .3px rgba(180, 180, 180, 1));
   filter: drop-shadow( 0 0 .3px rgba(180, 180, 180, 1));
 }
@@ -103,6 +103,9 @@ option.option-text, select.option-text {
   text-shadow: 1px 1px 1px #888;
 }
 
+.show-more {
+  color: rgb(0,120,168)
+}
 
 .top-bar, .menu {
   background: rgba(255,255,255,1)!important

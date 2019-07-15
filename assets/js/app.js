@@ -28,10 +28,9 @@ $(document).foundation();
         MINZOOM = 11,
         ZOOM = 13,
         MAXZOOM = 18,
-        BASEMAP1 = '//tiles.arcgis.com/tiles/fLeGjb7u4uXqeF9q/arcgis/rest/services/CityBasemap/MapServer',
-        BASEMAP1_LABELS = '//tiles.arcgis.com/tiles/fLeGjb7u4uXqeF9q/arcgis/rest/services/CityBasemap_Labels/MapServer',
-        BASEMAP2 = '//services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer',
-        baseUri = W.baseUri,
+        BASEMAP1 = 'https://tiles.arcgis.com/tiles/fLeGjb7u4uXqeF9q/arcgis/rest/services/CityBasemap/MapServer',
+        BASEMAP1_LABELS = 'https://tiles.arcgis.com/tiles/fLeGjb7u4uXqeF9q/arcgis/rest/services/CityBasemap_Labels/MapServer',
+        BASEMAP2 = 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer',
         Titles = { 'past': 'Completed', 'future': 'Upcoming' },
         Active = [],
         LmapFuture,
@@ -44,9 +43,9 @@ $(document).foundation();
             f: L.spriteIcon()
         },
         Services = {
-            demos: '//cloudapis3.philadelphiavotes.com/demos',
-            demos_past: '//cloudapis3.philadelphiavotes.com/demos/past',
-            demos_future: '//cloudapis3.philadelphiavotes.com/demos/future'
+            demos: 'https://cloudapis3.philadelphiavotes.com/demos',
+            demos_past: 'https://cloudapis3.philadelphiavotes.com/demos/past',
+            demos_future: 'https://cloudapis3.philadelphiavotes.com/demos/future'
         };
 
     // begin ajax functions
@@ -86,7 +85,7 @@ $(document).foundation();
     // start map functions
 
     function setDefaultBasemaps(Lmap) {
-        DEBUG ? console.log('setDefaultBasemaps') : ''
+
         if (BASEMAP1) {
             L.esri.tiledMapLayer({
                 url: BASEMAP1
@@ -164,8 +163,8 @@ $(document).foundation();
             row_obj = []
             start = jsn.features[i].attributes.start
             end = jsn.features[i].attributes.end
-            date_start = new Date(start.substr(0,4), start.substr(5,2), start.substr(8,2), start.substr(11,2), start.substr(14,2), start.substr(17,2))
-            date_end = new Date(end.substr(0,4), end.substr(5,2), end.substr(8,2), end.substr(11,2), end.substr(14,2), end.substr(17,2))
+            date_start = new Date(start.substr(0, 4), start.substr(5, 2), start.substr(8, 2), start.substr(11, 2), start.substr(14, 2), start.substr(17, 2))
+            date_end = new Date(end.substr(0, 4), end.substr(5, 2), end.substr(8, 2), end.substr(11, 2), end.substr(14, 2), end.substr(17, 2))
 
             row_obj.day = getFormattedDate(date_start)
             row_obj.start = getFormattedTime(date_start)
@@ -336,19 +335,19 @@ $(document).foundation();
                 for (var i = 0; i < marker.options.attributes.length; i++) {
                     var start = marker.options.attributes[i].start,
                         end = marker.options.attributes[i].end,
-                        date_start = new Date(start.substr(0,4), start.substr(5,2), start.substr(8,2), start.substr(11,2), start.substr(14,2), start.substr(17,2)),
-                        date_end = new Date(end.substr(0,4), end.substr(5,2), end.substr(8,2), end.substr(11,2), end.substr(14,2), end.substr(17,2))
+                        date_start = new Date(start.substr(0, 4), start.substr(5, 2), start.substr(8, 2), start.substr(11, 2), start.substr(14, 2), start.substr(17, 2)),
+                        date_end = new Date(end.substr(0, 4), end.substr(5, 2), end.substr(8, 2), end.substr(11, 2), end.substr(14, 2), end.substr(17, 2))
                     if (dates.length) {
                         date = ', '
                     }
                     date += (getFormattedDate(date_start) + " " + getFormattedTime(date_start, date_end)).replace(' ', '&nbsp;')
-                    if (i < 10) {
+                    if (i < 8) {
                         dates_short += date
                     }
                     dates += date
                 }
-                // comparisions here are intentionally broken and the wrong dates strings are referenced
-                dates_html = '<span class="less">' + dates + (dates.length == dates.length ? '' : ' <span class="show-more">(more...)</span>') + '</span>'
+
+                dates_html = '<span class="less">' + dates_short + (dates.length == dates_short.length ? '' : ' <span class="show-more">(Click &apos;Download CSV&apos; below to view all)</span>') + '</span>'
                 if (dates.length != dates.length) {
                     dates_html += '<span class="more hidden">' + dates + ' <span class="show-less">(less...)</span></span>'
                 }
@@ -404,9 +403,11 @@ $(document).foundation();
     //    ...any midnight (hour) time is taken to mean "TBA" regardless of minutes    
     function getFormattedTime(start, end) {
         DEBUG ? console.log('getFormattedTime') : ''
-        var value = ''
+        if (!start) {
+            return false
+        }
         if (start && end) {
-            value = 'sT - eT'
+            return 'sT - eT'
                 .replace('sT', (start.getHours() == 0 ? "TBA" :
                     (start.getHours() > 12 ? (start.getHours() % 12) : start.getHours() +
                         (start.getMinutes() > 0 ? ':' + ('000' + start.getMinutes()).slice(-2) : '')
@@ -420,17 +421,15 @@ $(document).foundation();
                     ) +
                     (end.getHours() >= 12 ? ' pm' : ' am')
                 ))
-        } else {
-            value = 'sT'
-                .replace('sT', (start.getHours() == 0 ? "TBA" :
-                    (start.getHours() > 12 ? (start.getHours() % 12) : start.getHours() +
-                        (start.getMinutes() > 0 ? ':' + ('000' + start.getMinutes()).slice(-2) : '')
-                    ) +
-                    (start.getHours() >= 12 ? ' pm' : ' am')
-
-                ))
         }
-        return value
+        return 'sT'
+            .replace('sT', (start.getHours() == 0 ? "TBA" :
+                (start.getHours() > 12 ? (start.getHours() % 12) : start.getHours() +
+                    (start.getMinutes() > 0 ? ':' + ('000' + start.getMinutes()).slice(-2) : '')
+                ) +
+                (start.getHours() >= 12 ? ' pm' : ' am')
+
+            ))
     }
 
     function pad(n, width, z) {
@@ -438,17 +437,6 @@ $(document).foundation();
         z = z || '0' // default padding: '0'
         width = width || 2 // default digits: 2
         return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n
-    }
-
-    function CN(args) {
-
-        if (!DEBUG) {
-            return;
-        }
-        var re = /function (.*?)\(/;
-        var s = CN.caller.toString();
-        var m = re.exec(s);
-        console.log(m[1], args.length ? args : "");
     }
 
     function clearNativeMapEvents(Lmap) {
@@ -501,7 +489,7 @@ $(document).foundation();
         $(D).off('mouseover', '.event-panel .show-less')
         $parent.hide(100)
         $next.slideDown(100)
-        setTimeout(function () { $(D).on('mouseover', '.event-panel .show-less', showLess) }, 500)
+        setTimeout(function() { $(D).on('mouseover', '.event-panel .show-less', showLess) }, 500)
     }
 
     function showLess() {
@@ -514,7 +502,7 @@ $(document).foundation();
         $(D).off('mouseover', '.event-panel .show-more')
         $parent.hide(100)
         $previous.slideDown(100)
-        setTimeout(function () { $(D).on('mouseover', '.event-panel .show-more', showMore) }, 500)
+        setTimeout(function() { $(D).on('mouseover', '.event-panel .show-more', showMore) }, 500)
     }
 
     function clickMenuItem() {
@@ -559,9 +547,10 @@ $(document).foundation();
 
     // event hooks
 
-    $(D).on('mouseover', '.event-panel .show-more', showMore)
+    // backign out of show-more show-less for an incremental release
+    //$(D).on('mouseover', '.event-panel .show-more', showMore)
 
-    $(D).on('mouseover', '.event-panel .show-less', showLess)
+    //$(D).on('mouseover', '.event-panel .show-less', showLess)
 
     $(D).on('click', '.menu-item', clickMenuItem)
 

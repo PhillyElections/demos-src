@@ -147,6 +147,8 @@ $(document).foundation();
         //
         Lmap.options.csv_array = []
         Lmap.options.total = jsn.features.length
+        W.start = jsn.features[0].attributes.start
+            console.log(jsn.features[0].attributes.start)
 
         for (var i = 0; i < jsn.features.length; i++) {
             ward = pad(jsn.features[i].attributes.precinct, 4).substr(0, 2)
@@ -163,8 +165,9 @@ $(document).foundation();
             row_obj = []
             start = jsn.features[i].attributes.start
             end = jsn.features[i].attributes.end
-            date_start = new Date(start.substr(0, 4), start.substr(5, 2), start.substr(8, 2), start.substr(11, 2), start.substr(14, 2), start.substr(17, 2))
-            date_end = new Date(end.substr(0, 4), end.substr(5, 2), end.substr(8, 2), end.substr(11, 2), end.substr(14, 2), end.substr(17, 2))
+            console.log(start)
+            var date_start = new Date(start.substr(0, 4), start.substr(5, 2)-1, start.substr(8, 2), start.substr(11, 2), start.substr(14, 2), start.substr(17, 2))
+            date_end = new Date(end.substr(0, 4), end.substr(5, 2)-1, end.substr(8, 2), end.substr(11, 2), end.substr(14, 2), end.substr(17, 2))
 
             row_obj.day = getFormattedDate(date_start)
             row_obj.start = getFormattedTime(date_start)
@@ -335,8 +338,8 @@ $(document).foundation();
                 for (var i = 0; i < marker.options.attributes.length; i++) {
                     var start = marker.options.attributes[i].start,
                         end = marker.options.attributes[i].end,
-                        date_start = new Date(start.substr(0, 4), start.substr(5, 2), start.substr(8, 2), start.substr(11, 2), start.substr(14, 2), start.substr(17, 2)),
-                        date_end = new Date(end.substr(0, 4), end.substr(5, 2), end.substr(8, 2), end.substr(11, 2), end.substr(14, 2), end.substr(17, 2))
+                        date_start = new Date(start.substr(0, 4), start.substr(5, 2)-1, start.substr(8, 2), start.substr(11, 2), start.substr(14, 2), start.substr(17, 2)),
+                        date_end = new Date(end.substr(0, 4), end.substr(5, 2)-1, end.substr(8, 2), end.substr(11, 2), end.substr(14, 2), end.substr(17, 2))
                     if (dates.length) {
                         date = ', '
                     }

@@ -165,7 +165,7 @@ $(document).foundation();
             row_obj = []
             start = jsn.features[i].attributes.start
             end = jsn.features[i].attributes.end
-            console.log(start)
+
             var date_start = new Date(start.substr(0, 4), start.substr(5, 2)-1, start.substr(8, 2), start.substr(11, 2), start.substr(14, 2), start.substr(17, 2))
             date_end = new Date(end.substr(0, 4), end.substr(5, 2)-1, end.substr(8, 2), end.substr(11, 2), end.substr(14, 2), end.substr(17, 2))
 
@@ -412,14 +412,14 @@ $(document).foundation();
         if (start && end) {
             return 'sT - eT'
                 .replace('sT', (start.getHours() == 0 ? "TBA" :
-                    (start.getHours() > 12 ? (start.getHours() % 12) : start.getHours() +
+                    ((start.getHours() > 12 ? (start.getHours() % 12) : start.getHours()) +
                         (start.getMinutes() > 0 ? ':' + ('000' + start.getMinutes()).slice(-2) : '')
                     ) +
                     (start.getHours() >= 12 ? ' pm' : ' am')
 
                 ))
                 .replace('eT', (end.getHours() == 0 ? "TBA" :
-                    (end.getHours() > 12 ? (end.getHours() % 12) : end.getHours() +
+                    ((end.getHours() > 12 ? (end.getHours() % 12) : end.getHours()) +
                         (end.getMinutes() > 0 ? ':' + ('000' + end.getMinutes()).slice(-2) : '')
                     ) +
                     (end.getHours() >= 12 ? ' pm' : ' am')
@@ -427,7 +427,7 @@ $(document).foundation();
         }
         return 'sT'
             .replace('sT', (start.getHours() == 0 ? "TBA" :
-                (start.getHours() > 12 ? (start.getHours() % 12) : start.getHours() +
+                ((start.getHours() > 12 ? (start.getHours() % 12) : start.getHours()) +
                     (start.getMinutes() > 0 ? ':' + ('000' + start.getMinutes()).slice(-2) : '')
                 ) +
                 (start.getHours() >= 12 ? ' pm' : ' am')

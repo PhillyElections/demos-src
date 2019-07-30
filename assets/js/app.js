@@ -13,8 +13,6 @@ require('foundation-sites');
 // the line below
 //import './lib/foundation-explicit-pieces';
 
-$(document).foundation();
-
 // map code
 (function(scoped) {
     scoped(window.jQuery, window.L, window, document)
@@ -523,6 +521,9 @@ $(document).foundation();
         $next.addClass('visible')
         $(".menu-item").removeClass('is-active')
         $(this).addClass('is-active')
+        if ($("#menu-right").hasClass("vertical")) {
+            $("#top-bar").foundation('toggleMenu');
+        }
     }
 
     function changeWardsOption() {
@@ -561,6 +562,15 @@ $(document).foundation();
 
     // init
     $(function() {
+
+        $(D).foundation();
+
+        if (Foundation.MediaQuery.atLeast('medium')) {
+            $("#menu-right").removeClass("vertical")
+            //$("#top-menu").slideUp(500)
+        }
+
+
         $('#container-usage').hide()
         $('#container-faq').hide()
         // Lmap(s) setup (custom options object in second param )

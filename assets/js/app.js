@@ -26,6 +26,8 @@ require('foundation-sites');
         MINZOOM = 11,
         ZOOM = 13,
         MAXZOOM = 18,
+        TIMING_IN = 250,
+        TIMING_OUT = 100,
         BASEMAP1 = 'https://tiles.arcgis.com/tiles/fLeGjb7u4uXqeF9q/arcgis/rest/services/CityBasemap/MapServer',
         BASEMAP1_LABELS = 'https://tiles.arcgis.com/tiles/fLeGjb7u4uXqeF9q/arcgis/rest/services/CityBasemap_Labels/MapServer',
         BASEMAP2 = 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer',
@@ -488,8 +490,8 @@ require('foundation-sites');
 
         }
         $(D).off('mouseover', '.event-panel .show-less')
-        $parent.hide(100)
-        $next.slideDown(100)
+        $parent.hide(TIMING_OUT)
+        $next.slideDown(TIMING_IN)
         setTimeout(function() { $(D).on('mouseover', '.event-panel .show-less', showLess) }, 500)
     }
 
@@ -501,8 +503,8 @@ require('foundation-sites');
 
 
         $(D).off('mouseover', '.event-panel .show-more')
-        $parent.hide(100)
-        $previous.slideDown(100)
+        $parent.hide(TIMING_OUT)
+        $previous.slideDown(TIMING_IN)
         setTimeout(function() { $(D).on('mouseover', '.event-panel .show-more', showMore) }, 500)
     }
 
@@ -517,8 +519,8 @@ require('foundation-sites');
         }
         console.log(segment)
         $last.removeClass('visible')
-        $last.slideUp(100)
-        $next.slideDown(100)
+        $last.fadeOut(TIMING_OUT)
+        $next.fadeIn(TIMING_IN)
         $next.addClass('visible')
         $(".menu-item").removeClass('is-active')
         $(this).addClass('is-active')

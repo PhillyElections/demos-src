@@ -515,6 +515,7 @@ require('foundation-sites');
         if ($next[0].id == $last[0].id) {
             return
         }
+        console.log(segment)
         $last.removeClass('visible')
         $last.slideUp(100)
         $next.slideDown(100)
@@ -573,6 +574,7 @@ require('foundation-sites');
 
         $('#container-usage').hide()
         $('#container-faq').hide()
+        $('#container-board').hide()
         // Lmap(s) setup (custom options object in second param )
         LmapPast = mapSetup('map_past', { type: 'past', iconType: 'p', selectId: 'wards_past' })
         LmapFuture = mapSetup('map_future', { type: 'future', iconType: 'f', selectId: 'wards_future' })

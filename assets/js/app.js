@@ -173,10 +173,10 @@ require('foundation-sites');
             row_obj.day = getFormattedDate(date_start)
             row_obj.start = getFormattedTime(date_start)
             row_obj.end = getFormattedTime(date_end)
-            row_obj.address = jsn.features[i].attributes.address_street
-            row_obj.zip = jsn.features[i].attributes.zip
             row_obj.ward = ward
             row_obj.div = div
+            row_obj.address = jsn.features[i].attributes.address_street
+            row_obj.zip = jsn.features[i].attributes.zip
 
             // let's built and push out CSV export rows
             if (jsn.features[i].attributes.display_title) {

@@ -524,9 +524,9 @@ require('foundation-sites');
         $next.addClass('visible')
         $(".menu-item").removeClass('is-active')
         $(this).addClass('is-active')
-        if ($("#menu-right").hasClass("vertical")) {
+        //if ($("#menu-right").hasClass("vertical")) {
             $("#top-bar").foundation('toggleMenu');
-        }
+        //}
     }
 
     function changeWardsOption() {

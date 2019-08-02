@@ -133,12 +133,12 @@ require('foundation-sites');
         DEBUG ? console.log('setInitialMarkers') : ''
 
         var addresses = [],
-            ward, link, select, title, marker, row_obj, wards = [],
+            ward, div, link, select, title, marker, row_obj, wards = [],
             options = '',
             start, end, date_start, date_end
 
         // setup our 'global' arrays
-        // active 
+        // active
         Active[Lmap.options.type] = []
         // by Address
         Addresses[Lmap.options.type] = []
@@ -152,6 +152,7 @@ require('foundation-sites');
 
         for (var i = 0; i < jsn.features.length; i++) {
             ward = pad(jsn.features[i].attributes.precinct, 4).substr(0, 2)
+            div = pad(jsn.features[i].attributes.precinct, 4).substr(2, 2)
             // instantiate array segment if needed
             if ('undefined' == typeof addresses[ward + '|' + jsn.features[i].attributes.address_street]) {
                 addresses[ward + '|' + jsn.features[i].attributes.address_street] = []
@@ -174,6 +175,8 @@ require('foundation-sites');
             row_obj.end = getFormattedTime(date_end)
             row_obj.address = jsn.features[i].attributes.address_street
             row_obj.zip = jsn.features[i].attributes.zip
+            row_obj.ward = ward
+            row_obj.div = div
 
             // let's built and push out CSV export rows
             if (jsn.features[i].attributes.display_title) {
@@ -403,7 +406,7 @@ require('foundation-sites');
     }
 
     //    Note:  getFormattedTime is not a generalized time formatting function due to one assumption:
-    //    ...any midnight (hour) time is taken to mean "TBA" regardless of minutes    
+    //    ...any midnight (hour) time is taken to mean "TBA" regardless of minutes
     function getFormattedTime(start, end) {
         DEBUG ? console.log('getFormattedTime') : ''
         if (!start) {

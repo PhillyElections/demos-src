@@ -148,7 +148,7 @@ require('foundation-sites');
         Lmap.options.csv_array = []
         Lmap.options.total = jsn.features.length
         W.start = jsn.features[0].attributes.start
-            console.log(jsn.features[0].attributes.start)
+        console.log(jsn.features[0].attributes.start)
 
         for (var i = 0; i < jsn.features.length; i++) {
             ward = pad(jsn.features[i].attributes.precinct, 4).substr(0, 2)
@@ -167,8 +167,8 @@ require('foundation-sites');
             start = jsn.features[i].attributes.start
             end = jsn.features[i].attributes.end
 
-            var date_start = new Date(start.substr(0, 4), start.substr(5, 2)-1, start.substr(8, 2), start.substr(11, 2), start.substr(14, 2), start.substr(17, 2))
-            date_end = new Date(end.substr(0, 4), end.substr(5, 2)-1, end.substr(8, 2), end.substr(11, 2), end.substr(14, 2), end.substr(17, 2))
+            var date_start = new Date(start.substr(0, 4), start.substr(5, 2) - 1, start.substr(8, 2), start.substr(11, 2), start.substr(14, 2), start.substr(17, 2))
+            date_end = new Date(end.substr(0, 4), end.substr(5, 2) - 1, end.substr(8, 2), end.substr(11, 2), end.substr(14, 2), end.substr(17, 2))
 
             row_obj.day = getFormattedDate(date_start)
             row_obj.start = getFormattedTime(date_start)
@@ -191,6 +191,7 @@ require('foundation-sites');
             Lmap.options.csv_array.push(row_obj)
 
         }
+
         Object.keys(addresses).forEach(function(idx) {
             var attributes = [],
                 coordinates
@@ -341,8 +342,8 @@ require('foundation-sites');
                 for (var i = 0; i < marker.options.attributes.length; i++) {
                     var start = marker.options.attributes[i].start,
                         end = marker.options.attributes[i].end,
-                        date_start = new Date(start.substr(0, 4), start.substr(5, 2)-1, start.substr(8, 2), start.substr(11, 2), start.substr(14, 2), start.substr(17, 2)),
-                        date_end = new Date(end.substr(0, 4), end.substr(5, 2)-1, end.substr(8, 2), end.substr(11, 2), end.substr(14, 2), end.substr(17, 2))
+                        date_start = new Date(start.substr(0, 4), start.substr(5, 2) - 1, start.substr(8, 2), start.substr(11, 2), start.substr(14, 2), start.substr(17, 2)),
+                        date_end = new Date(end.substr(0, 4), end.substr(5, 2) - 1, end.substr(8, 2), end.substr(11, 2), end.substr(14, 2), end.substr(17, 2))
                     if (dates.length) {
                         date = ', '
                     }
@@ -528,7 +529,7 @@ require('foundation-sites');
         $(".menu-item").removeClass('is-active')
         $(this).addClass('is-active')
         //if ($("#menu-right").hasClass("vertical")) {
-            $("#top-bar").foundation('toggleMenu');
+        $("#top-bar").foundation('toggleMenu');
         //}
     }
 

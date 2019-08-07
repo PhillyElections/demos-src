@@ -557,14 +557,7 @@ require('foundation-sites');
     }
 
     // event hooks
-
-    // backign out of show-more show-less for an incremental release
-    //$(D).on('mouseover', '.event-panel .show-more', showMore)
-
-    //$(D).on('mouseover', '.event-panel .show-less', showLess)
-
     $(D).on('click', '.menu-item', clickMenuItem)
-
     $(D).on('change', '#wards_future, #wards_past', changeWardsOption);
 
     // init
@@ -576,7 +569,6 @@ require('foundation-sites');
             $("#menu-right").removeClass("vertical")
             //$("#top-menu").slideUp(500)
         }
-
 
         $('#container-usage').hide()
         $('#container-faq').hide()

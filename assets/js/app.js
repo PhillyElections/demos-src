@@ -520,17 +520,17 @@ require('foundation-sites');
             $(".video-en").hide(400) //.next().fadeIn(400)
             $(".video-es").show(400)
             if ($(this).hasClass('ver-en-espanol-modal')) {
-                $("#modal-video-es").trigger('play')
+               // $("#modal-video-es").trigger('play')
             } else {
-                $("#inline-video-es").trigger('play')
+               // $("#inline-video-es").trigger('play')
             }
         } else {
             $(".video-es").hide(400) //.previous().fadeIn(400)
             $(".video-en").show(400)
             if ($(this).hasClass('see-english-modal')) {
-                $("#modal-video-en").trigger('play')
+               // $("#modal-video-en").trigger('play')
             } else {
-                $("#inline-video-en").trigger('play')
+               // $("#inline-video-en").trigger('play')
             }
         }
     }

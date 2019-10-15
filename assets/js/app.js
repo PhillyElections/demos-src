@@ -587,7 +587,7 @@ require('foundation-sites');
     $(D).on('click', '.menu-item', clickMenuItem)
     $(D).on('change', '#wards_future, #wards_past', changeWardsOption);
     $(D).on('closed.zf.reveal', '#info-modal', stopVideos);
-    $(D).on('open.zf.reveal', '#info-modal', function() { setTimeout(function() {$("#modal-video-en").trigger('play')},500)});
+//    $(D).on('open.zf.reveal', '#info-modal', function() { setTimeout(function() {$("#modal-video-en").trigger('play')},1000)});
 
     // init
     $(function() {

@@ -148,7 +148,6 @@ require('foundation-sites');
         Lmap.options.csv_array = []
         Lmap.options.total = jsn.features.length
         W.start = jsn.features[0].attributes.start
-        console.log(jsn.features[0].attributes.start)
 
         for (var i = 0; i < jsn.features.length; i++) {
             ward = pad(jsn.features[i].attributes.precinct, 4).substr(0, 2)
@@ -514,25 +513,24 @@ require('foundation-sites');
 
     function clickVideoLabel() {
         DEBUG ? console.log('clickVideoLabel') : ''
-        console.log(this)
         stopVideos()
         if ($(this).hasClass('ver-en-espanol-modal') || $(this).hasClass('ver-en-espanol-inline')) {
-            $(".video-en").hide(400) //.next().fadeIn(400)
+            $(".video-en").hide(400)
             $(".video-es").show(400)
-            if ($(this).hasClass('ver-en-espanol-modal')) {
-               // $("#modal-video-es").trigger('play')
+/*            if ($(this).hasClass('ver-en-espanol-modal')) {
+                $("#modal-video-es").trigger('play')
             } else {
-               // $("#inline-video-es").trigger('play')
+                $("#inline-video-es").trigger('play')
             }
-        } else {
-            $(".video-es").hide(400) //.previous().fadeIn(400)
+*/        } else {
+            $(".video-es").hide(400)
             $(".video-en").show(400)
-            if ($(this).hasClass('see-english-modal')) {
+/*            if ($(this).hasClass('see-english-modal')) {
                // $("#modal-video-en").trigger('play')
             } else {
                // $("#inline-video-en").trigger('play')
             }
-        }
+*/        }
     }
 
     function clickMenuItem() {
@@ -544,7 +542,7 @@ require('foundation-sites');
         if ($next[0].id == $last[0].id) {
             return
         }
-        console.log(segment)
+        
         $last.removeClass('visible')
         $last.fadeOut(TIMING_OUT)
         $next.fadeIn(TIMING_IN)

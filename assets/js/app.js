@@ -512,6 +512,29 @@ require('foundation-sites');
         setTimeout(function() { $(D).on('mouseover', '.event-panel .show-more', showMore) }, 500)
     }
 
+    function clickVideoLabel() {
+        DEBUG ? console.log('clickVideoLabel') : ''
+        console.log(this)
+        stopVideos()
+        if ($(this).hasClass('ver-en-espanol-modal') || $(this).hasClass('ver-en-espanol-inline')) {
+            $(".video-en").hide(400) //.next().fadeIn(400)
+            $(".video-es").show(400)
+            if ($(this).hasClass('ver-en-espanol-modal')) {
+                $("#modal-video-es").trigger('play')
+            } else {
+                $("#inline-video-es").trigger('play')
+            }
+        } else {
+            $(".video-es").hide(400) //.previous().fadeIn(400)
+            $(".video-en").show(400)
+            if ($(this).hasClass('see-english-modal')) {
+                $("#modal-video-en").trigger('play')
+            } else {
+                $("#inline-video-en").trigger('play')
+            }
+        }
+    }
+
     function clickMenuItem() {
         DEBUG ? console.log('clickMenuItem') : ''
         var segment = this.id.replace('menu-item-', ''),
@@ -528,9 +551,8 @@ require('foundation-sites');
         $next.addClass('visible')
         $(".menu-item").removeClass('is-active')
         $(this).addClass('is-active')
-        //if ($("#menu-right").hasClass("vertical")) {
         $("#top-bar").foundation('toggleMenu');
-        //}
+        stopVideos()
     }
 
     function changeWardsOption() {
@@ -556,9 +578,16 @@ require('foundation-sites');
         }
     }
 
+    function stopVideos() {
+        $("#modal-video-en, #modal-video-es, #inline-video-en, #inline-video-es").trigger('pause')
+    }
+
     // event hooks
+    $(D).on('click', '.see-english-inline, .ver-en-espanol-inline, .see-english-modal, .ver-en-espanol-modal', clickVideoLabel)
     $(D).on('click', '.menu-item', clickMenuItem)
     $(D).on('change', '#wards_future, #wards_past', changeWardsOption);
+    $(D).on('closed.zf.reveal', '#info-modal', stopVideos);
+    $(D).on('open.zf.reveal', '#info-modal', function() { setTimeout(function() {$("#modal-video-en").trigger('play')},500)});
 
     // init
     $(function() {
@@ -570,9 +599,11 @@ require('foundation-sites');
             //$("#top-menu").slideUp(500)
         }
 
+        $('.video-es').hide()
         $('#container-usage').hide()
         $('#container-faq').hide()
         $('#container-board').hide()
+        $('#info-modal').foundation('open')
         // Lmap(s) setup (custom options object in second param )
         LmapPast = mapSetup('map_past', { type: 'past', iconType: 'p', selectId: 'wards_past' })
         LmapFuture = mapSetup('map_future', { type: 'future', iconType: 'f', selectId: 'wards_future' })

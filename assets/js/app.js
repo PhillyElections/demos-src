@@ -577,7 +577,7 @@ require('foundation-sites');
     }
 
     function stopVideos() {
-        $("#modal-video-en, #modal-video-es, #inline-video-en, #inline-video-es").trigger('pause')
+        $("#modal-video-en, #modal-video-es, #inline-video-en, #inline-video-es, #inline-video-pp").trigger('pause')
     }
 
     // event hooks

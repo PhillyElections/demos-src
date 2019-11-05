@@ -13,6 +13,131 @@ require('foundation-sites');
 // the line below
 //import './lib/foundation-explicit-pieces';
 
+/*
+A simple jQuery function that can add listeners on attribute change.
+http://meetselva.github.io/attrchange/
+
+About License:
+Copyright (C) 2013-2014 Selvakumar Arumugam
+You may use attrchange plugin under the terms of the MIT Licese.
+https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
+ */
+(function($) {
+    function isDOMAttrModifiedSupported() {
+        var p = document.createElement('p');
+        var flag = false;
+
+        if (p.addEventListener) {
+            p.addEventListener('DOMAttrModified', function() {
+                flag = true
+            }, false);
+        } else if (p.attachEvent) {
+            p.attachEvent('onDOMAttrModified', function() {
+                flag = true
+            });
+        } else { return false; }
+        p.setAttribute('id', 'target');
+        return flag;
+    }
+
+    function checkAttributes(chkAttr, e) {
+        if (chkAttr) {
+            var attributes = this.data('attr-old-value');
+
+            if (e.attributeName.indexOf('style') >= 0) {
+                if (!attributes['style'])
+                    attributes['style'] = {}; //initialize
+                var keys = e.attributeName.split('.');
+                e.attributeName = keys[0];
+                e.oldValue = attributes['style'][keys[1]]; //old value
+                e.newValue = keys[1] + ':' +
+                    this.prop("style")[$.camelCase(keys[1])]; //new value
+                attributes['style'][keys[1]] = e.newValue;
+            } else {
+                e.oldValue = attributes[e.attributeName];
+                e.newValue = this.attr(e.attributeName);
+                attributes[e.attributeName] = e.newValue;
+            }
+
+            this.data('attr-old-value', attributes); //update the old value object
+        }
+    }
+
+    //initialize Mutation Observer
+    var MutationObserver = window.MutationObserver ||
+        window.WebKitMutationObserver;
+
+    $.fn.attrchange = function(a, b) {
+        if (typeof a == 'object') { //core
+            var cfg = {
+                trackValues: false,
+                callback: $.noop
+            };
+            //backward compatibility
+            if (typeof a === "function") { cfg.callback = a; } else { $.extend(cfg, a); }
+
+            if (cfg.trackValues) { //get attributes old value
+                this.each(function(i, el) {
+                    var attributes = {};
+                    for (var attr, i = 0, attrs = el.attributes, l = attrs.length; i < l; i++) {
+                        attr = attrs.item(i);
+                        attributes[attr.nodeName] = attr.value;
+                    }
+                    $(this).data('attr-old-value', attributes);
+                });
+            }
+
+            if (MutationObserver) { //Modern Browsers supporting MutationObserver
+                var mOptions = {
+                    subtree: false,
+                    attributes: true,
+                    attributeOldValue: cfg.trackValues
+                };
+                var observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(e) {
+                        var _this = e.target;
+                        //get new value if trackValues is true
+                        if (cfg.trackValues) {
+                            e.newValue = $(_this).attr(e.attributeName);
+                        }
+                        if ($(_this).data('attrchange-status') === 'connected') { //execute if connected
+                            cfg.callback.call(_this, e);
+                        }
+                    });
+                });
+
+                return this.data('attrchange-method', 'Mutation Observer').data('attrchange-status', 'connected')
+                    .data('attrchange-obs', observer).each(function() {
+                        observer.observe(this, mOptions);
+                    });
+            } else if (isDOMAttrModifiedSupported()) { //Opera
+                //Good old Mutation Events
+                return this.data('attrchange-method', 'DOMAttrModified').data('attrchange-status', 'connected').on('DOMAttrModified', function(event) {
+                    if (event.originalEvent) { event = event.originalEvent; } //jQuery normalization is not required 
+                    event.attributeName = event.attrName; //property names to be consistent with MutationObserver
+                    event.oldValue = event.prevValue; //property names to be consistent with MutationObserver
+                    if ($(this).data('attrchange-status') === 'connected') { //disconnected logically
+                        cfg.callback.call(this, event);
+                    }
+                });
+            } else if ('onpropertychange' in document.body) { //works only in IE        
+                return this.data('attrchange-method', 'propertychange').data('attrchange-status', 'connected').on('propertychange', function(e) {
+                    e.attributeName = window.event.propertyName;
+                    //to set the attr old value
+                    checkAttributes.call($(this), cfg.trackValues, e);
+                    if ($(this).data('attrchange-status') === 'connected') { //disconnected logically
+                        cfg.callback.call(this, e);
+                    }
+                });
+            }
+            return this;
+        } else if (typeof a == 'string' && $.fn.attrchange.hasOwnProperty('extensions') &&
+            $.fn.attrchange['extensions'].hasOwnProperty(a)) { //extensions/options
+            return $.fn.attrchange['extensions'][a].call(this, b);
+        }
+    }
+})(jQuery);
+
 // map code
 (function(scoped) {
     scoped(window.jQuery, window.L, window, document)
@@ -114,6 +239,7 @@ require('foundation-sites');
         var Lmap = L.map(mapId, { zoomControl: false }).setView(CITY_HALL, ZOOM)
         Lmap.options.minZoom = MINZOOM
         Lmap.options.maxZoom = MAXZOOM
+
         Object.keys(options).forEach(function(idx) {
             Lmap.options[idx] = options[idx]
         })
@@ -242,7 +368,7 @@ require('foundation-sites');
         select = L.control({ position: 'topleft' })
         select.onAdd = function(Lmap) {
             var div = L.DomUtil.create('div', 'info legend');
-            div.innerHTML = '<div class="map-select">Filter by ward:</div><select id="' + Lmap.options.selectId + '">' + options + '</select>'
+            div.innerHTML = '<div class="map-select">Filter by ward:</div><select class="notranslate" id="' + Lmap.options.selectId + '">' + options + '</select>'
             div.firstChild.onmousedown = div.firstChild.ondblclick = L.DomEvent.stopPropagation
             return div
         }
@@ -511,26 +637,17 @@ require('foundation-sites');
         setTimeout(function() { $(D).on('mouseover', '.event-panel .show-more', showMore) }, 500)
     }
 
-    function clickVideoLabel() {
+    function clickVideoLabel(lang) {
         DEBUG ? console.log('clickVideoLabel') : ''
         stopVideos()
-        if ($(this).hasClass('ver-en-espanol-modal') || $(this).hasClass('ver-en-espanol-inline')) {
-            $(".video-en").hide(400)
-            $(".video-es").show(400)
-/*            if ($(this).hasClass('ver-en-espanol-modal')) {
-                $("#modal-video-es").trigger('play')
-            } else {
-                $("#inline-video-es").trigger('play')
-            }
-*/        } else {
-            $(".video-es").hide(400)
-            $(".video-en").show(400)
-/*            if ($(this).hasClass('see-english-modal')) {
-               // $("#modal-video-en").trigger('play')
-            } else {
-               // $("#inline-video-en").trigger('play')
-            }
-*/        }
+        console.log("clickVideoLabel", lang)
+        if (lang == 'es') {
+            $(".video-en, .image-en").hide(400)
+            $(".video-es, .image-es").show(400)
+        } else {
+            $(".video-es, .image-es").hide(400)
+            $(".video-en, .image-en").show(400)
+        }
     }
 
     function clickMenuItem() {
@@ -542,7 +659,7 @@ require('foundation-sites');
         if ($next[0].id == $last[0].id) {
             return
         }
-        
+
         $last.removeClass('visible')
         $last.fadeOut(TIMING_OUT)
         $next.fadeIn(TIMING_IN)
@@ -580,12 +697,38 @@ require('foundation-sites');
         $("#modal-video-en, #modal-video-es, #inline-video-en, #inline-video-es, #inline-video-pp").trigger('pause')
     }
 
+    function onTranslate() {
+        var $this = $(this)
+        console.log($this.innerHTML)
+    }
+
     // event hooks
-    $(D).on('click', '.see-english-inline, .ver-en-espanol-inline, .see-english-modal, .ver-en-espanol-modal', clickVideoLabel)
+    $(D).on('click', '.see-english-inline, .see-english-modal', function() { clickVideoLabel('en') })
+    $(D).on('click', '.ver-en-espanol-inline, .ver-en-espanol-modal', function() { clickVideoLabel('es') })
     $(D).on('click', '.menu-item', clickMenuItem)
     $(D).on('change', '#wards_future, #wards_past', changeWardsOption);
     $(D).on('closed.zf.reveal', '#info-modal', stopVideos);
-//    $(D).on('open.zf.reveal', '#info-modal', function() { setTimeout(function() {$("#modal-video-en").trigger('play')},1000)});
+
+    $('html').attrchange({
+        trackValues: true,
+        callback: function(e) {
+            if (e.attributeName == "lang" && e.oldValue == "en" && e.newValue == "es") {
+                clickVideoLabel('es')
+            }
+            if (e.attributeName == "lang" && e.oldValue == "auto" && e.newValue == "es") {
+                clickVideoLabel('es')
+            }
+            if (e.attributeName == "lang" && e.oldValue == "es" && e.newValue == "en") {
+                clickVideoLabel('en')
+            }
+            if (e.attributeName == "lang" && e.oldValue == "auto" && e.newValue == "en") {
+                clickVideoLabel('en')
+            }
+            if (e.attributeName == "lang" && e.oldValue != e.newValue ) {
+                console.log("from " + e.oldValue + " to " + e.newValue )
+            }
+        }
+    })
 
     // init
     $(function() {
@@ -597,31 +740,43 @@ require('foundation-sites');
             //$("#top-menu").slideUp(500)
         }
 
-        $('.video-es').hide()
-        $('#container-usage').hide()
-        $('#container-faq').hide()
-        $('#container-board').hide()
-        $('#info-modal').foundation('open')
         // Lmap(s) setup (custom options object in second param )
         LmapPast = mapSetup('map_past', { type: 'past', iconType: 'p', selectId: 'wards_past' })
         LmapFuture = mapSetup('map_future', { type: 'future', iconType: 'f', selectId: 'wards_future' })
 
         getMarkersPromise(Services.demos_future).then(function(data) {
             var json = JSON.parse(data)
-            setInitialMarkers(LmapFuture, json)
+            if (typeof json.features.length != 'undefined' && json.features.length > 0) {
+                setInitialMarkers(LmapFuture, json)
+            }
+            LmapFuture.json = json
         }).catch(function(error) {
             console.log('error:', error)
         }).finally(function() {
-            writeCSVLink(LmapFuture)
+            if (typeof LmapFuture.json.features.length != 'undefined' && LmapFuture.json.features.length > 0) {
+                writeCSVLink(LmapFuture)
+            }
         })
 
         getMarkersPromise(Services.demos_past).then(function(data) {
             var json = JSON.parse(data)
-            setInitialMarkers(LmapPast, json)
+            if (typeof json.features.length != 'undefined' && json.features.length > 0) {
+                setInitialMarkers(LmapPast, json)
+            }
+            LmapPast.json = json
         }).catch(function(error) {
             console.log('error:', error)
         }).finally(function() {
-            writeCSVLink(LmapPast)
+            if (typeof LmapPast.json.features.length != 'undefined' && LmapPast.json.features.length > 0) {
+                writeCSVLink(LmapPast)
+            }
+            $('.image-es').hide()
+            $('.video-es').hide()
+            $('#container-usage').hide()
+            $('#container-faq').hide()
+            $('#container-board').hide()
+            $('#info-modal').foundation('open')
+
             $('#container-demos').hide()
             $('#menu-item-info').addClass('is-active')
             if (navigator.geolocation) {

@@ -432,8 +432,8 @@ https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
             content += obj2CSVRow(csv_array[item]);
         });
 
-        var encodedUri = encodeURI(content);
-        var link = D.getElementById(Lmap.options.type + '_download')
+        var encodedUri = encodeURI(content).replace(new RegExp("#", "g"), "%23")l
+        var link = D.getElementById(Lmap.options.type + '_download');
         link.setAttribute("href", encodedUri);
         link.setAttribute("download", Lmap.options.type + "_events.csv");
     }

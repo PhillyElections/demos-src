@@ -429,10 +429,11 @@ https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
 
         //rows
         Object.keys(csv_array).forEach(function(item) {
-            content += obj2CSVRow(csv_array[item]);
+            content += encodeURIComponent(obj2CSVRow(csv_array[item]));
         });
 
-        var encodedUri = encodeURI(content).replace(new RegExp("#", "g"), "%23")l
+        // note, the replacement of # for %23 is a bit kludgy, but there isn't a good place to do encodeURIComponent()
+        var encodedUri = content;//encodeURI(content).replace(new RegExp("#", "g"), "%23");
         var link = D.getElementById(Lmap.options.type + '_download');
         link.setAttribute("href", encodedUri);
         link.setAttribute("download", Lmap.options.type + "_events.csv");
@@ -724,8 +725,8 @@ https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
             if (e.attributeName == "lang" && e.oldValue == "auto" && e.newValue == "en") {
                 clickVideoLabel('en')
             }
-            if (e.attributeName == "lang" && e.oldValue != e.newValue ) {
-                console.log("from " + e.oldValue + " to " + e.newValue )
+            if (e.attributeName == "lang" && e.oldValue != e.newValue) {
+                console.log("from " + e.oldValue + " to " + e.newValue)
             }
         }
     })
